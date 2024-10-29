@@ -22,3 +22,13 @@ Feature: Feature
   Scenario: execute composite step
     Given I execute composite step
 
+  Scenario: custom memory value type read
+    When Read memory "$customValue" from cucumber type
+    When Read memory '$customValue' from cucumber type
+
+  Scenario: custom memory value type write
+    When write '42' to 'memory' value
+    When write "43" to 'memory' value
+
+  Scenario: validation type
+    When I expect '1' to equal '1'

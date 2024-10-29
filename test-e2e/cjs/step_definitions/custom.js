@@ -1,7 +1,7 @@
 const { When, DataTable } = require('@cucumber/cucumber');
 const { Override } = require('../../../utils');
 const { expect } = require('chai');
-const memory = require('@qavajs/memory');
+
 When('I do test', async function() {});
 Override('I do test', async function() {
     console.log('I am overridden')
@@ -14,12 +14,12 @@ When('I do smth async', async function() {
 });
 
 When('I verify that config loaded', async function() {
-    expect(config.defaultTimeout).to.equal(20000);
+    expect(this.config.defaultTimeout).to.equal(20000);
 });
 
 When('I verify that memory loaded', async function() {
-    expect(memory.getValue('$customValue')).to.equal('cjs');
-    expect(memory.getValue('$additionalValue')).to.equal(12);
+    expect(this.memory.getValue('$customValue')).to.equal('cjs');
+    expect(this.memory.getValue('$additionalValue')).to.equal(12);
 });
 
 When('I verify that memory is connected to qavajs world', async function() {
@@ -50,14 +50,27 @@ When('I execute composite step', async function () {
     await this.executeStep('Nested step "42"');
     const customDataTable = new DataTable([['1', '2', '3']])
     await this.executeStep('Data table step:', customDataTable);
-    expect(memory.getValue('$nestedValue')).to.equal('42');
-    expect(memory.getValue('$dataTable')).to.deep.equal({ rawTable: [['1', '2', '3']]});
+    expect(this.memory.getValue('$nestedValue')).to.equal('42');
+    expect(this.memory.getValue('$dataTable')).to.deep.equal({ rawTable: [['1', '2', '3']]});
 });
 
 When('Nested step {string}', async function(val) {
-    memory.setValue('nestedValue', val);
+    this.memory.setValue('nestedValue', val);
 });
 
 When('Data table step:', function (dataTable) {
-    memory.setValue('dataTable', dataTable);
+    this.memory.setValue('dataTable', dataTable);
+});
+
+When('Read memory {value} from cucumber type', async function(memoryValue) {
+    expect(memoryValue.value()).to.equal('cjs');
+});
+
+When('write {string} to {value} value', async function(value, key) {
+    key.set(value);
+    expect(this.memory.getValue('$'+key.expression)).to.equal(value);
+});
+
+When('I expect {string} {validation} {string}', async function(value1, validate, value2) {
+    validate(value1, value2);
 });

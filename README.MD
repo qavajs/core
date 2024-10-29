@@ -1,10 +1,10 @@
-[![npm version](https://badge.fury.io/js/@qavajs%2Fcli.svg)](https://badge.fury.io/js/@qavajs%2Fcli)
+[![npm version](https://badge.fury.io/js/@qavajs%2Fcore.svg)](https://badge.fury.io/js/@qavajs%2Fcore)
 
-## @qavajs/cli
+## @qavajs/core
 
-Cli for @qavajs framework.
+@qavajs framework core
           
-`npm install @qavajs/cli`
+`npm install @qavajs/core`
 
 Run tests
 
@@ -51,12 +51,34 @@ All params that you passed to qavajs cli will be available in CLI_ARGV environme
 
 ### Override step definition
 ```javascript
-const { Override } = require('@qavajs/cli/utils');
+const { Override } = require('@qavajs/core/utils');
 
 When('I do test', async function() {});
 
 Override('I do test', async function() {
-    console.log('I am overridden')
+    console.log('I am overridden');
+});
+```
+
+### Memory value parameter type
+_value_ parameter type provides API to access memory
+
+```javascript
+When('Read memory {value}', async function(memoryValue) {
+    expect(memoryValue.value()).to.equal('ts');
+});
+
+When('Set memory {value} as {string}', async function(memoryKey, value) {
+    memoryKey.set(value);
+});
+```
+
+### Validation parameter type
+_validation_ parameter type provides API to verify values by certain condition
+
+```javascript
+When('I expect {string} {validation} {string}', async function(value1, validate, value2) {
+    validate(value1, value2);
 });
 ```
 
@@ -92,3 +114,4 @@ Module extends CucumberJS world with additional entities
 | executeStep | function | programmatically execute certain step definition | `await this.executeStep("I type 'username' to 'Username Input'");` |
 | setValue    | function | set memory value                                 | `await this.setValue('key', 'value');`                             |
 | getValue    | function | get memory value or expression                   | `await this.getValue('$key');`                                     |
+| validation  | function | get validation function based                    | `await this.getValue('to equal');`                                 |

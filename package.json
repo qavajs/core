@@ -1,7 +1,7 @@
 {
-  "name": "@qavajs/cli",
-  "version": "1.0.0",
-  "description": "cli for qavajs framework",
+  "name": "@qavajs/core",
+  "version": "2.1.1",
+  "description": "qavajs framework core",
   "scripts": {
     "build": "tsc",
     "test": "vitest --coverage run",
@@ -11,7 +11,7 @@
     "test:e2e:esm:default": "node bin/qavajs.js run --config test-e2e/esm/config.js --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e:cjs:default": "node bin/qavajs.js run --config test-e2e/cjs/config.js --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e:ts:default": "node bin/qavajs.js --config test-e2e/ts/config.ts --qavaBoolean --qavaValue 42 --tags @one --tags @two",
-    "test:e2e": "npm run test:e2e:cjs && npm run test:e2e:esm && npm run test:e2e:ts && npm run test:e2e:cjs:default && npm run test:e2e:esm:default && npm run test:e2e:ts:default"
+    "test:e2e": "npm run build && npm run test:e2e:cjs && npm run test:e2e:esm && npm run test:e2e:ts && npm run test:e2e:cjs:default && npm run test:e2e:esm:default && npm run test:e2e:ts:default"
   },
   "authors": [
     "Alexandr Galichenko",
@@ -26,21 +26,22 @@
     "node": ">=18"
   },
   "dependencies": {
-    "@swc/core": "^1.7.26",
+    "@qavajs/memory": "^1.10.1",
+    "@qavajs/validation": "^0.10.0",
+    "@swc/core": "^1.7.40",
     "chalk": "^5.3.0",
     "yargs": "^17.7.2"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^11.0.1",
-    "@qavajs/memory": "^1.9.0",
-    "@types/chai": "^4.3.19",
-    "@types/node": "^20.16.5",
+    "@types/node": "^22.8.1",
     "@types/yargs": "^17.0.33",
-    "@vitest/coverage-v8": "^2.1.1",
-    "@vitest/ui": "^2.1.1",
+    "@vitest/coverage-v8": "^2.1.4",
+    "@vitest/ui": "^2.1.4",
+    "@types/chai": "^4.3.20",
     "chai": "^4.5.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.2",
-    "vitest": "^2.1.1"
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
   }
 }
