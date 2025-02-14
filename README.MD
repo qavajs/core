@@ -22,42 +22,6 @@ example
 
 it will override $url memory value
 
-### Service
-Services is an entities that can execute logic before and after whole test run.
-
-```typescript
-import externalService from './externalService';
-
-export default {
-    service: [
-        {
-            options: {
-                data: 42
-            },
-            before() {
-                console.log(this.options.data);
-            },
-            after(result) {
-                if (!result.success) process.exitCode = 1;
-            }
-        },
-        {
-            options: {
-                data: 42
-            },
-            ...externalService
-        }
-    ]
-}
-```
-There is a one minute-long default timeout for a before and after test logic to prevent entire process from freezing.
-To set up a custom timeout in milliseconds use serviceTimeout property in the config file
-```typescript
-export default {
-    serviceTimeout: 1_200_000
-}
-```
-
 ### Pass CLI params to workers
 All params that you passed to qavajs cli will be available in CLI_ARGV environment variable in all child workers.
 
@@ -166,4 +130,59 @@ When('I click {string} and verify {string}', Template((locator, expected) => `
     I click '${locator}'
     I expect '${locator} > Value' to equal '${expected}'
 `));
+```
+
+### Test Execution Hooks
+`BeforeExecution` and `AfterExecution` allow to define hooks that will be executed 
+once before/after whole test execution
+
+```typescript
+import { BeforeExecution, AfterExecution } from '@qavajs/core';
+import { Server } from './server';
+
+const server = new Server();
+
+BeforeExecution(async function () {
+    await server.start();
+});
+
+AfterExecution(async function () {
+    await server.stop();
+});
+```
+
+### Service
+Services is an entities that can execute logic before and after whole test run.
+
+```typescript
+import externalService from './externalService';
+
+export default {
+    service: [
+        {
+            options: {
+                data: 42
+            },
+            before() {
+                console.log(this.options.data);
+            },
+            after(result) {
+                if (!result.success) process.exitCode = 1;
+            }
+        },
+        {
+            options: {
+                data: 42
+            },
+            ...externalService
+        }
+    ]
+}
+```
+There is a one minute-long default timeout for a before and after test logic to prevent entire process from freezing.
+To set up a custom timeout in milliseconds use serviceTimeout property in the config file
+```typescript
+export default {
+    serviceTimeout: 1_200_000
+}
 ```

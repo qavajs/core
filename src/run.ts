@@ -69,9 +69,16 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
         provided: {...config, ...argv},
         profiles: [process.env.PROFILE as string]
     }
-    const {runConfiguration} = await loadConfiguration(options, environment);
+    const { runConfiguration } = await loadConfiguration(options, environment);
     runConfiguration.support.requireModules = [memoryLoadHook, ...runConfiguration.support.requireModules];
-    runConfiguration.support = await loadSupport(runConfiguration);
+    const {
+        supportCode,
+        beforeExecutionHooks,
+        afterExecutionHooks
+    } = await prepareSupportCode(loadSupport, runConfiguration);
+    runConfiguration.support = supportCode;
+    await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
+
     if (argv.shard) {
         console.log(chalk.blue(`Shard: ${argv.shard}`));
         const {plan} = await loadSources(runConfiguration.sources);
@@ -87,6 +94,7 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     const {plan} = await loadSources(runConfiguration.sources);
     console.log(chalk.blue(`Test Cases: ${plan.length}`));
     const result: IRunResult = await runCucumber(runConfiguration, environment);
+    await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
     process.exitCode = result.success || argv.errorExit === false ? 0 : 1;
 }
@@ -95,4 +103,27 @@ export default async function (): Promise<void> {
     const chalk = await chalkModule;
     const cucumber = await import('@cucumber/cucumber/api');
     await run(cucumber, chalk);
+}
+
+async function prepareSupportCode(loadSupport: any, runConfiguration: any) {
+    process.env.QAVAJS_COORDINATOR = '1';
+    const supportCode = await loadSupport(runConfiguration);
+    process.env.QAVAJS_COORDINATOR = '0';
+    const beforeExecutionHooks = supportCode
+        .beforeTestRunHookDefinitions
+        .filter((hook: any) => hook.code.isTestExecutionHook)
+    supportCode.beforeTestRunHookDefinitions = supportCode
+        .beforeTestRunHookDefinitions
+        .filter((hook: any) => !hook.code.isTestExecutionHook);
+    const afterExecutionHooks = supportCode
+        .afterTestRunHookDefinitions
+        .filter((hook: any) => hook.code.isTestExecutionHook)
+    supportCode.afterTestRunHookDefinitions = supportCode
+        .afterTestRunHookDefinitions
+        .filter((hook: any) => !hook.code.isTestExecutionHook);
+    return {
+        supportCode,
+        beforeExecutionHooks,
+        afterExecutionHooks,
+    }
 }

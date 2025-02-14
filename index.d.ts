@@ -4,6 +4,7 @@ import { IConfiguration, IRunResult } from '@cucumber/cucumber/api';
 export const Override: typeof When;
 export { Fixture } from 'src/Fixture';
 export { Template } from 'src/Template';
+export { BeforeExecution, AfterExecution } from 'src/executionHooks.js';
 
 /**
  * Validation function
