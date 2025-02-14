@@ -6,11 +6,22 @@ import {
     IQavajsWorld,
     Validation,
     MemoryValue,
-    Template
+    Template,
+    BeforeExecution,
+    AfterExecution
 } from '../../../index';
 import { expect } from 'chai';
 //@ts-ignore
 import moduleCJS from '../../modules/module.cjs';
+
+let valueInCoordinator = 0;
+BeforeExecution(async function () {
+    valueInCoordinator = 1;
+});
+
+AfterExecution(async function () {
+    expect(valueInCoordinator).to.equal(1);
+});
 
 Fixture('testFixture', async function(this: IQavajsWorld) {
     console.log('setup test fixture');

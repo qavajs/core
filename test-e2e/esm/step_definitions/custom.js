@@ -1,7 +1,16 @@
-import { DataTable, When, Override, Fixture, Template } from '../../../index.mjs';
+import { DataTable, When, Override, Fixture, Template, AfterExecution, BeforeExecution } from '../../../index.mjs';
 import { expect } from 'chai';
 import moduleESM from '../../modules/module.mjs';
 import moduleCJS from '../../modules/module.cjs';
+
+let valueInCoordinator = 0;
+BeforeExecution(async function () {
+    valueInCoordinator = 1;
+});
+
+AfterExecution(async function () {
+    expect(valueInCoordinator).to.equal(1);
+});
 
 Fixture('testFixture', async function() {
     console.log('setup test fixture');
