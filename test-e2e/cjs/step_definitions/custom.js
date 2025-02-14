@@ -1,5 +1,23 @@
-const { Template, Override, Fixture, When, DataTable } = require('../../../index');
+const {
+    Template,
+    Override,
+    Fixture,
+    When,
+    DataTable,
+    BeforeExecution,
+    AfterExecution
+} = require('../../../index');
 const { expect } = require('chai');
+
+let valueInCoordinator = 0;
+BeforeExecution(async function () {
+    valueInCoordinator = 1;
+});
+
+AfterExecution(async function () {
+    expect(valueInCoordinator).to.equal(1);
+});
+
 
 Fixture('testFixture', async function() {
     console.log('setup test fixture');

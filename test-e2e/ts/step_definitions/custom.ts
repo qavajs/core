@@ -7,8 +7,6 @@ import {
     Validation,
     MemoryValue,
     Template,
-    AfterAll,
-    BeforeAll,
     BeforeExecution,
     AfterExecution
 } from '../../../index';
@@ -16,12 +14,13 @@ import { expect } from 'chai';
 //@ts-ignore
 import moduleCJS from '../../modules/module.cjs';
 
+let valueInCoordinator = 0;
 BeforeExecution(async function () {
-    console.log('before execution');
+    valueInCoordinator = 1;
 });
 
 AfterExecution(async function () {
-    console.log('after execution');
+    expect(valueInCoordinator).to.equal(1);
 });
 
 Fixture('testFixture', async function(this: IQavajsWorld) {
