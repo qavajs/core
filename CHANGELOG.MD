@@ -12,7 +12,31 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 
 ## [2.4.0]
 - :microscope: introduced `BeforeExecution` and `AfterExecution` hooks
+
+```typescript
+import { BeforeExecution, AfterExecution } from '@qavajs/core';
+import { Server } from './server';
+
+const server = new Server();
+
+BeforeExecution(async function () {
+    await server.start();
+});
+
+AfterExecution(async function () {
+    await server.stop();
+});
+```
 - :microscope: added capability to define `Template`
+
+```typescript
+import { When, Template } from '@qavajs/core';
+
+When('I click {string} and verify {string}', Template((locator, expected) => `
+    I click '${locator}'
+    I expect '${locator} > Value' to equal '${expected}'
+`));
+```
 
 ## [2.3.0]
 - :microscope: added capability to define `Fixture`
