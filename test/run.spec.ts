@@ -10,6 +10,11 @@ beforeEach(async () => {
     vi.useRealTimers();
 });
 
+const supportMock = {
+    beforeTestRunHookDefinitions: [],
+    afterTestRunHookDefinitions: [],
+}
+
 test('exitCode=1 if scenario failed', async () => {
     process.argv.push('--config')
     process.argv.push('config.ts')
@@ -25,7 +30,7 @@ test('exitCode=1 if scenario failed', async () => {
             return {plan: []}
         }),
         loadSupport: vi.fn(() => {
-            return {}
+            return supportMock
         })
     };
     const chalkMock = {blue: vi.fn()};
@@ -48,7 +53,7 @@ test('exitCode=0 if passed --no-error-exit', async () => {
             return {plan: []}
         }),
         loadSupport: vi.fn(() => {
-            return {}
+            return supportMock
         })
     };
     const chalkMock = {blue: vi.fn()};
