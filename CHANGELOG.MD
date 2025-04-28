@@ -10,6 +10,12 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.5.0]
+- :rocket: added capability to provide `softly` modifier to perform soft validations
+```gherkin
+Then I expect '$variable' to softly equal '42'
+```
+
 ## [2.4.0]
 - :microscope: introduced `BeforeExecution` and `AfterExecution` hooks
 
