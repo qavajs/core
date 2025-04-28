@@ -35,4 +35,4 @@ Feature: Feature
 
   @testFixture
   Scenario: fixture
-    When I expect '$valueFromFixture' to equal 'qavajsFixture2'
+    When I expect '$valueFromFixture' to equal 'qavajsFixture'
