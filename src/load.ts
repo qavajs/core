@@ -3,8 +3,9 @@ import {
   DataTable,
   defineParameterType,
   setDefaultTimeout,
-  supportCodeLibraryBuilder
+  supportCodeLibraryBuilder,
 } from '@cucumber/cucumber';
+import TestCaseRunner from '@cucumber/cucumber/lib/runtime/test_case_runner';
 
 import memory from '@qavajs/memory';
 import { getValidation, getPollValidation } from '@qavajs/validation';
@@ -14,6 +15,15 @@ const configPath = process.env.CONFIG as string;
 const profile = process.env.PROFILE as string;
 const config = importConfig(configPath, profile);
 const memoryValues = JSON.parse(process.env.MEMORY_VALUES as string);
+
+// soft error cucumber patch
+TestCaseRunner.prototype.isSkippingSteps = function (this: any) {
+  return this.testStepResults.some((stepResult: any) => {
+    return stepResult.status !== 'PASSED'
+        && !!stepResult.exception
+        && stepResult.exception.type !== 'SoftAssertionError'
+  });
+}
 
 export async function executeStep(this: any, text: string, extraParam?: DataTable | string) {
   const stepDefsLibrary = supportCodeLibraryBuilder.buildStepDefinitions();
@@ -77,7 +87,7 @@ defineParameterType({
 
 defineParameterType({
   name: 'validation',
-  regexp: /((?:is |do |does |to )?(not |to not )?(?:to )?(?:be )?(equal|strictly equal|deeply equal|have member|match|contain|above|below|greater than|less than|have type|have property|match schema|include members)(?:s|es)?)/,
+  regexp: /((?:is |do |does |to )?(not |to not )?(?:to )?(?:be )?(softly )?(equal|strictly equal|deeply equal|have member|match|contain|above|below|greater than|less than|have type|have property|match schema|include members)(?:s|es| to)?)/,
   transformer: type => {
     const validation = getValidation(type) as Validation;
     validation.poll = getPollValidation(type);
