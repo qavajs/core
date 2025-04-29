@@ -39,7 +39,7 @@ When('Set memory {value} as {string}', async function(memoryKey, value) {
 ```
 
 ### Validation parameter type
-`validation` parameter type provides API to verify values by certain condition
+`validation` parameter type provides an API to verify values by a certain condition
 
 ```javascript
 When('I expect {string} {validation} {string}', async function(value1, validate, value2) {
@@ -47,8 +47,24 @@ When('I expect {string} {validation} {string}', async function(value1, validate,
 });
 ```
 
+### Soft Validation
+You can use the `softly` prefix before expect.
+```gherkin
+Feature: Feature
+
+  Scenario: verify soft assert
+    # first step fails, but other steps will not be skipped
+    Then I expect '2' to softly equal '1'
+    # pass
+    And I expect '1' to softly equal '1'
+    # fail
+    And I expect '2' to softly equal '1'
+    # skip
+    And I expect '1' to softly equal '1'
+```
+
 ### Test Sharding
-qavajs provides ability to shard your tests between different machines. To do so pass `--shard x/y` parameter in CLI,
+qavajs provides the ability to shard your tests between different machines. To do so pass `--shard x/y` parameter in CLI,
 where x - current shard, y - total number of shards.
 
 ```
@@ -95,9 +111,9 @@ Override('I do test', async function () {
 ```
 
 ### Fixture
-`Fixture` provides convenient way to prepare test environment for specific test.
+`Fixture` provides a convenient way to prepare a test environment for specific test.
 
-This example will open pdp page before test and clean cart after test
+This example will open pdp page before test and clean the cart after the test
 ```typescript
 import { Fixture } from '@qavajs/core';
 
@@ -134,7 +150,7 @@ When('I click {string} and verify {string}', Template((locator, expected) => `
 
 ### Test Execution Hooks
 `BeforeExecution` and `AfterExecution` allow to define hooks that will be executed 
-once before/after whole test execution
+once before/after the whole test execution
 
 ```typescript
 import { BeforeExecution, AfterExecution } from '@qavajs/core';
@@ -152,7 +168,7 @@ AfterExecution(async function () {
 ```
 
 ### Service
-Services is an entities that can execute logic before and after whole test run.
+Services are entities that can execute logic before and after the whole test run.
 
 ```typescript
 import externalService from './externalService';
@@ -179,8 +195,8 @@ export default {
     ]
 }
 ```
-There is a one minute-long default timeout for a before and after test logic to prevent entire process from freezing.
-To set up a custom timeout in milliseconds use serviceTimeout property in the config file
+There is a one-minute default timeout for the before and after test logic to prevent the entire process from freezing.
+To set up a custom timeout in milliseconds, use `serviceTimeout` property in the config file
 ```typescript
 export default {
     serviceTimeout: 1_200_000
