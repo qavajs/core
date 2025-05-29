@@ -4,21 +4,23 @@
 
 @qavajs framework core
           
-`npm install @qavajs/core`
+```bash
+npm install @qavajs/core
+```
 
 Run tests
 
-`npx qavajs run --config <config> --profile <profile>`
-or
-`npx qavajs --config <config> --profile <profile>`
+```bash
+npx qavajs --config <config> --profile <profile>
+```
 
 ### Override memory values
 In case if tests need to be run with updated memory value they can be passed via CLI (e.g run scenarios on some other url)
 It can be done by passing `--memory-values` parameter which is JSON with params that need to be overridden
 
-example
-
-```npx qavajs run --config config.ts --memory-values '{"url": "https://github.com"}'``` 
+```
+npx qavajs --config config.ts --memory-values '{"url": "https://github.com"}'
+``` 
 
 it will override $url memory value
 
@@ -67,9 +69,9 @@ Feature: Feature
 qavajs provides the ability to shard your tests between different machines. To do so pass `--shard x/y` parameter in CLI,
 where x - current shard, y - total number of shards.
 
-```
-npx qavajs run --config config.js --shard 1/2
-npx qavajs run --config config.js --shard 2/2
+```bash
+npx qavajs --config config.js --shard 1/2
+npx qavajs --config config.js --shard 2/2
 ```
 
 ### Execute steps from other steps
