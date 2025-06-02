@@ -36,3 +36,6 @@ Feature: Feature
   @testFixture
   Scenario: fixture
     When I expect '$valueFromFixture' to equal 'qavajsFixture'
+
+  Scenario: Template
+    When I click 'a' and verify '42'
