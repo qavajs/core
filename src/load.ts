@@ -19,9 +19,7 @@ const memoryValues = JSON.parse(process.env.MEMORY_VALUES as string);
 // soft error cucumber patch
 TestCaseRunner.prototype.isSkippingSteps = function (this: any) {
   return this.testStepResults.some((stepResult: any) => {
-    return stepResult.status !== 'PASSED'
-        && !!stepResult.exception
-        && stepResult.exception.type !== 'SoftAssertionError'
+    return !['PASSED', 'FAILED'].includes(stepResult.status) || (stepResult.status === 'FAILED' && stepResult.exception?.type !== 'SoftAssertionError')
   });
 }
 
