@@ -39,3 +39,4 @@ Feature: Feature
 
   Scenario: Template
     When I click 'a' and verify '42'
+    When I expect '1' to equal '1'
