@@ -32,8 +32,9 @@ export async function executeStep(this: any, text: string, extraParam?: DataTabl
   const { parameters } = await step.getInvocationParameters({ step: { text }, world: this } as any);
   try {
     await step.code.apply(this, [...parameters, extraParam]);
-  } catch (err) {
-    throw new Error(`${text}\n${err}`);
+  } catch (err: any) {
+    err.message = `${text}\n${err.message}`;
+    throw err;
   }
 }
 
