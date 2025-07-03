@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.5.2]
+- :beetle: re-throw original error in `executeStep`
+
 ## [2.5.1]
 - :beetle: fixed issue with improper skipping logic
 
