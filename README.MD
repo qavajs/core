@@ -14,19 +14,6 @@ Run tests
 npx qavajs --config <config> --profile <profile>
 ```
 
-### Override memory values
-In case if tests need to be run with updated memory value they can be passed via CLI (e.g run scenarios on some other url)
-It can be done by passing `--memory-values` parameter which is JSON with params that need to be overridden
-
-```
-npx qavajs --config config.ts --memory-values '{"url": "https://github.com"}'
-``` 
-
-it will override $url memory value
-
-### Pass CLI params to workers
-All params that you passed to qavajs cli will be available in CLI_ARGV environment variable in all child workers.
-
 ### Memory value parameter type
 `value` parameter type provides API to access memory
 
@@ -48,6 +35,17 @@ When('I expect {string} {validation} {string}', async function(value1, validate,
     validate(value1, value2);
 });
 ```
+
+### World
+Module extends CucumberJS world with additional entities
+
+| entity      | type     | description                                      | example                                                            |
+|-------------|----------|--------------------------------------------------|--------------------------------------------------------------------|
+| config      | object   | loaded config                                    | `this.config.parallel`                                             |
+| executeStep | function | programmatically execute certain step definition | `await this.executeStep("I type 'username' to 'Username Input'");` |
+| setValue    | function | set memory value                                 | `await this.setValue('key', 'value');`                             |
+| getValue    | function | get memory value or expression                   | `await this.getValue('$key');`                                     |
+| validation  | function | get validation function based                    | `await this.validation('to equal');`                               |
 
 ### Soft Validation
 You can use the `softly` prefix before expect.
@@ -87,17 +85,6 @@ When('I do smth complex', async function() {
     ]))
 });
 ```
-
-### World
-Module extends CucumberJS world with additional entities  
- 
-| entity      | type     | description                                      | example                                                            |
-|-------------|----------|--------------------------------------------------|--------------------------------------------------------------------|
-| config      | object   | loaded config                                    | `this.config.parallel`                                             |
-| executeStep | function | programmatically execute certain step definition | `await this.executeStep("I type 'username' to 'Username Input'");` |
-| setValue    | function | set memory value                                 | `await this.setValue('key', 'value');`                             |
-| getValue    | function | get memory value or expression                   | `await this.getValue('$key');`                                     |
-| validation  | function | get validation function based                    | `await this.getValue('to equal');`                                 |
 
 ### Override step definition
 `Override` function provides capability to override step implementation and avoid ambiguous exception
@@ -168,6 +155,19 @@ AfterExecution(async function () {
     await server.stop();
 });
 ```
+
+### Override memory values
+In case if tests need to be run with updated memory value they can be passed via CLI (e.g run scenarios on some other url)
+It can be done by passing `--memory-values` parameter which is JSON with params that need to be overridden
+
+```
+npx qavajs --config config.ts --memory-values '{"url": "https://github.com"}'
+``` 
+
+it will override $url memory value
+
+### Pass CLI params to workers
+All params that you passed to qavajs cli will be available in CLI_ARGV environment variable in all child workers.
 
 ### Service
 Services are entities that can execute logic before and after the whole test run.
