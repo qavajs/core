@@ -39,7 +39,7 @@
     "@qavajs/validation": "^1.2.1",
     "@swc/core": "^1.12.9",
     "chalk": "^5.4.1",
-    "yargs": "^17.7.2"
+    "yargs": "^18.0.0"
   },
   "devDependencies": {
     "@cucumber/cucumber": "^11.3.0",
