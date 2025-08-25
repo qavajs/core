@@ -10,6 +10,20 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.6.0]
+- :rocket: added `to satisfy` validation to verify user-defined expectation provided as predicate
+```Gherkin
+Then I expect '$value' to satisfy '$either(1, 2)'
+```
+where `$either` is a function
+```typescript
+function either(...expected) {
+    return function (actual) {
+        return expected.includes(actual)
+    }
+}
+```
+
 ## [2.5.2]
 - :beetle: re-throw original error in `executeStep`
 
