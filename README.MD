@@ -2,7 +2,7 @@
 
 ## @qavajs/core
 
-@qavajs framework core
+`@qavajs/core` is the core and test runner module of the [qavajs](https://github.com/qavajs) automation framework.
           
 ```bash
 npm install @qavajs/core
