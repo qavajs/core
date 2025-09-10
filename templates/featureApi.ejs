@@ -1,8 +1,0 @@
-Feature: qavajs framework
-
-  Scenario: Request qavajs site
-    When I create 'GET' request 'request'
-    And I add 'https://qavajs.github.io/' url to '$request'
-    And I send '$request' request and save response as 'response'
-    And I parse '$response' body as text
-    Then I expect '$response.payload' contains '@qavajs'
