@@ -22,6 +22,37 @@ function mergeTags(tags: string[]) {
     return tags.map((tag: string) => `(${tag})`).join(' and ');
 }
 
+function isObject(obj: any) {
+    return obj && typeof obj === 'object' && !Array.isArray(obj);
+}
+
+/**
+ * Deep object merge
+ * @param target
+ * @param sources
+ */
+function deepMerge(target: any, ...sources: any[]) {
+    if (!sources.length) return target;
+
+    const source = sources.shift();
+
+    if (isObject(target) && isObject(source)) {
+        for (const key in source) {
+            if (isObject(source[key])) {
+                if (!target[key]) Object.assign(target, { [key]: {} });
+                deepMerge(target[key], source[key]);
+            } else if (Array.isArray(source[key])) {
+                if (!Array.isArray(target[key])) target[key] = [];
+                target[key] = target[key].concat(source[key]);
+            } else {
+                Object.assign(target, { [key]: source[key] });
+            }
+        }
+    }
+
+    return deepMerge(target, ...sources);
+}
+
 /**
  * Timeout promise
  * @param promise - promise to wait
@@ -66,7 +97,7 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
         env: process.env,
     }
     const options = {
-        provided: {...config, ...argv},
+        provided: deepMerge(config, argv),
         profiles: [process.env.PROFILE as string]
     }
     const { runConfiguration } = await loadConfiguration(options, environment);
@@ -96,6 +127,9 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     const result: IRunResult = await runCucumber(runConfiguration, environment);
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
+    for (const formatPath in runConfiguration?.formats?.files ?? {}) {
+        console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
+    }
     process.exitCode = result.success || argv.errorExit === false ? 0 : 1;
 }
 
