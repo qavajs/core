@@ -127,7 +127,6 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     const result: IRunResult = await runCucumber(runConfiguration, environment);
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
-    console.log(runConfiguration)
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }
