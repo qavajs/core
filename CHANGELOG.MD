@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.7.0]
+- :rocket: added capability to print report file path
+- :beetle: fixed issue with overwriting config properties by CLI inputs
+
 ## [2.6.0]
 - :rocket: added `to satisfy` validation to verify user-defined expectation provided as predicate
 ```Gherkin

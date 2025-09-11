@@ -9,6 +9,12 @@ export default {
     require: [
         'test-e2e/ts/step_definitions/*.ts'
     ],
+    format: [
+        ['json', 'file.json'],
+    ],
+    formatOptions: {
+        'q': 42
+    },
     memory: new Constants(),
     defaultTimeout: 20000,
     parallel: 1,
