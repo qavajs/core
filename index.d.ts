@@ -14,7 +14,7 @@ export { BeforeExecution, AfterExecution } from 'src/executionHooks.js';
  */
 export interface Validation {
     /**
-     * Perform polling validation
+     * Perform validation
      * @param {any} actualResult - actual result
      * @param {any} expectedResult - expected result
      */
