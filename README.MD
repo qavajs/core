@@ -19,7 +19,7 @@ npx qavajs --config <config> --profile <profile>
 
 ```javascript
 When('Read memory {value}', async function(memoryValue) {
-    expect(memoryValue.value()).to.equal('ts');
+    expect(memoryValue.value()).toEqual('ts');
 });
 
 When('Set memory {value} as {string}', async function(memoryKey, value) {
