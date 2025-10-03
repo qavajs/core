@@ -10,7 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
-## [2.7.0]
+## [2.8.1]
+- :beetle: updated `@qavajs/validation` with proper ts declarations
+
+## [2.8.0]
 - :rocket: updated `@qavajs/validation` without chai dependency
 
 ## [2.7.0]
