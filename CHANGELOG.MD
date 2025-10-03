@@ -11,6 +11,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :microscope: - experimental
 
 ## [2.7.0]
+- :rocket: updated `@qavajs/validation` without chai dependency
+
+## [2.7.0]
 - :rocket: added capability to print report file path
 - :beetle: fixed issue with overwriting config properties by CLI inputs
 
