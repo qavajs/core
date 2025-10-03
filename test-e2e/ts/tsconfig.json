@@ -9,6 +9,8 @@
     "strict": true,
     "skipLibCheck": true,
     "allowJs": true,
-    "types": ["../modules/module.d.ts"]
+    "types": [
+      "node"
+    ]
   }
 }
