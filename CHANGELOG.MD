@@ -10,6 +10,10 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.9.0]
+- :x: qavajs sharding removed in favor of cucumberjs built-in
+  https://github.com/cucumber/cucumber-js/issues/2303
+
 ## [2.8.1]
 - :beetle: updated `@qavajs/validation` with proper ts declarations
 
