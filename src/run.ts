@@ -1,7 +1,7 @@
 import ServiceHandler from './ServiceHandler';
 import { resolve } from 'node:path';
 import { importConfig } from './importConfig';
-import { IPlannedPickle, IRunResult } from '@cucumber/cucumber/api';
+import { IRunResult } from '@cucumber/cucumber/api';
 import { cliOptions } from './cliOptions';
 import { existsSync } from 'node:fs';
 const chalkModule = import('chalk').then(m => m.default);
@@ -109,20 +109,7 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     } = await prepareSupportCode(loadSupport, runConfiguration);
     runConfiguration.support = supportCode;
     await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
-
-    if (argv.shard) {
-        console.log(chalk.blue(`Shard: ${argv.shard}`));
-        const {plan} = await loadSources(runConfiguration.sources);
-        const [shard, totalShards] = argv.shard.split('/').map((val: string) => parseInt(val));
-        process.env.SHARD = shard;
-        process.env.TOTAL_SHARDS = totalShards;
-        const chunkLength = plan.length / totalShards;
-        const startIndex = Math.floor(shard * chunkLength - chunkLength);
-        const endIndex = totalShards / shard === 1 ? plan.length : chunkLength * shard;
-        const chunk = plan.slice(startIndex, endIndex);
-        runConfiguration.sources.names = chunk.map((scenario: IPlannedPickle) => scenario.name);
-    }
-    const {plan} = await loadSources(runConfiguration.sources);
+    const { plan } = await loadSources(runConfiguration.sources);
     console.log(chalk.blue(`Test Cases: ${plan.length}`));
     const result: IRunResult = await runCucumber(runConfiguration, environment);
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));

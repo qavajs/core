@@ -1,6 +1,6 @@
 {
   "name": "@qavajs/core",
-  "version": "2.8.1",
+  "version": "2.9.0",
   "description": "qavajs framework core",
   "scripts": {
     "build": "tsc",
@@ -16,6 +16,14 @@
     "test:e2e:ts:string:memory": "node bin/qavajs.js run --config test-e2e/ts/config.ts --profile stringMemory --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e": "npm run build && npm run test:e2e:cjs && npm run test:e2e:esm && npm run test:e2e:ts && npm run test:e2e:cjs:default && npm run test:e2e:esm:default && npm run test:e2e:ts:default && npm run test:e2e:esm:string:memory && npm run test:e2e:cjs:string:memory"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qavajs/core.git"
+  },
+  "bugs": {
+    "url": "https://github.com/qavajs/core/issues"
+  },
+  "homepage": "https://github.com/qavajs/coret#readme",
   "authors": [
     "Alexandr Galichenko",
     "Alexandr Legchilov"
@@ -43,7 +51,7 @@
   },
   "devDependencies": {
     "@cucumber/cucumber": "^12.2.0",
-    "@types/node": "^24.6.2",
+    "@types/node": "^24.7.1",
     "@types/yargs": "^17.0.33",
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
