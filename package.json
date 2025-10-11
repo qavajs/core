@@ -1,6 +1,6 @@
 {
   "name": "@qavajs/core",
-  "version": "2.9.0",
+  "version": "2.10.0",
   "description": "qavajs framework core",
   "scripts": {
     "build": "tsc",
@@ -23,7 +23,7 @@
   "bugs": {
     "url": "https://github.com/qavajs/core/issues"
   },
-  "homepage": "https://github.com/qavajs/coret#readme",
+  "homepage": "https://github.com/qavajs",
   "authors": [
     "Alexandr Galichenko",
     "Alexandr Legchilov"
@@ -40,12 +40,11 @@
   },
   "license": "MIT",
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   },
   "dependencies": {
-    "@qavajs/memory": "^1.10.2",
+    "@qavajs/memory": "^1.10.3",
     "@qavajs/validation": "^1.4.1",
-    "@swc/core": "^1.13.5",
     "chalk": "^5.6.2",
     "yargs": "^17.7.2"
   },
@@ -57,7 +56,8 @@
     "@vitest/ui": "^3.2.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@swc/core": "^1.13.5"
   },
   "keywords": [
     "test",
