@@ -10,6 +10,20 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.10.0]
+- :x: removed hardcoded `swc` flag in favor of project specific configuration
+```json
+{
+  "ts-node": {
+    "swc": true,
+    "compilerOptions": {
+      "target": "es2020"
+    }
+  }
+}
+
+```
+
 ## [2.9.0]
 - :x: qavajs sharding removed in favor of cucumberjs built-in
   https://github.com/cucumber/cucumber-js/issues/2303

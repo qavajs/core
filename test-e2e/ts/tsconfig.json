@@ -3,7 +3,6 @@
     "target": "es2018",
     "module": "commonjs",
     "moduleResolution": "node16",
-    "outDir": "./lib",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
