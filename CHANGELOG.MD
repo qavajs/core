@@ -10,6 +10,14 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.11.0]
+- added `executeTest` world method that allow to call other test from feature file
+```javascript
+When('I do smth very complex', async function() {
+    await this.executeTest(`features/Login.feature`, `Login Test`);
+});
+```
+
 ## [2.10.0]
 - :x: removed hardcoded `swc` flag in favor of project specific configuration
 ```json
@@ -21,7 +29,6 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
     }
   }
 }
-
 ```
 
 ## [2.9.0]

@@ -1,6 +1,9 @@
 @one @two
 Feature: Feature
 
+  Background:
+    When I do test
+
   Scenario: verify config
     When I verify that config loaded
 
@@ -58,3 +61,17 @@ Feature: Feature
   Scenario: Template
     When I click 'a' and verify '42'
     When I expect '1' to equal '1'
+
+  Scenario: called test
+    When I expect '1' to equal '1'
+    And data table step:
+      | x |
+      | 1 |
+    When multiline step:
+      """
+      multiline text
+      """
+
+  @debug
+  Scenario: execute test
+    Given dependency 'test-e2e/features/Feature.feature' 'called test'

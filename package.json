@@ -1,6 +1,6 @@
 {
   "name": "@qavajs/core",
-  "version": "2.10.0",
+  "version": "2.11.0",
   "description": "qavajs framework core",
   "scripts": {
     "build": "tsc",
@@ -52,7 +52,7 @@
     "@cucumber/cucumber": "^12.2.0",
     "@qavajs/console-formatter": "^1.1.1",
     "@swc/core": "^1.13.5",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.9.2",
     "@types/yargs": "^17.0.34",
     "@vitest/coverage-v8": "^4.0.4",
     "@vitest/ui": "^4.0.4",
