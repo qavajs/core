@@ -6,6 +6,9 @@ module.exports = {
         require: [
             'test-e2e/cjs/step_definitions/*.js'
         ],
+        format: [
+            ['@qavajs/console-formatter']
+        ],
         memory: [Memory, {additionalValue: 12}],
         defaultTimeout: 20000,
         parallel: 1,
@@ -26,6 +29,9 @@ module.exports = {
         paths: ['test-e2e/features/*.feature'],
         require: [
             'test-e2e/cjs/step_definitions/*.js'
+        ],
+        format: [
+            ['@qavajs/console-formatter']
         ],
         memory: './test-e2e/cjs/memory/index.js',
         defaultTimeout: 20000,

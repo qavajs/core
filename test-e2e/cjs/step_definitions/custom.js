@@ -103,3 +103,7 @@ When('I click {string} and verify {string}', Template((locator, expected) => `
     I expect '${expected}' to equal '42'
     I expect '42' to equal '${expected}'
 `));
+
+When('log {string}', function (value) {
+    this.log(value);
+});
