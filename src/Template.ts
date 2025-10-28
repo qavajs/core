@@ -1,4 +1,8 @@
-export function Template(scenario: (...args: any[]) => string) {
+import type { When } from '@cucumber/cucumber';
+
+type StepDefinitionCode = Parameters<typeof When>['2'];
+
+export function Template(scenario: (...args: any[]) => string): StepDefinitionCode {
     return new Proxy(scenario, {
         apply: async function (template, world, args) {
             const scenario = template(...args) as string;

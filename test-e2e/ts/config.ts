@@ -10,7 +10,7 @@ export default {
         'test-e2e/ts/step_definitions/*.ts'
     ],
     format: [
-        ['json', 'file.json'],
+        ['@qavajs/console-formatter']
     ],
     formatOptions: {
         'q': 42
@@ -41,6 +41,9 @@ export const stringMemory = {
     paths: ['test-e2e/features/*.feature'],
     require: [
         'test-e2e/ts/step_definitions/*.ts'
+    ],
+    format: [
+        ['@qavajs/console-formatter']
     ],
     memory: './test-e2e/ts/memory/index.ts',
     defaultTimeout: 20000,

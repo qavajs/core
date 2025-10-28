@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     coverage: {
       provider: 'v8',
-      include: ["src/install.ts"],
-      exclude: ["/lib/", "/node_modules/"],
+      include: ['src/run.ts', 'src/ServiceHandler.ts'],
+      exclude: ['/lib/', '/node_modules/'],
       branches: 0,
       functions: 0,
       lines: 0,
