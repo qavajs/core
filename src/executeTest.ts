@@ -17,7 +17,7 @@ export async function executeTest(this: IQavajsWorld, path: string, title: strin
     const tests = compile(gherkinDocument, filePath, uuidFn);
     const test = tests.find(test => test.name === title);
     if (!test) {
-        throw new Error(`Scenario '${title}' not found in ${filePath}`);
+        throw new Error(`Scenario '${title}' not found in '${filePath}'`);
     }
     for (const step of test.steps) {
         const argument = step.argument

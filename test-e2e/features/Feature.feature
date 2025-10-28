@@ -72,6 +72,5 @@ Feature: Feature
       multiline text
       """
 
-  @debug
   Scenario: execute test
     Given dependency 'test-e2e/features/Feature.feature' 'called test'
