@@ -107,3 +107,15 @@ When('I click {string} and verify {string}', Template((locator, expected) => `
 When('log {string}', function (value) {
     this.log(value);
 });
+
+When('dependency {string} {string}', async function (path, title) {
+    await this.executeTest(path, title);
+});
+
+When('data table step:', function (dataTable) {
+    console.log(dataTable);
+});
+
+When('multiline step:', function (multiline) {
+    console.log(multiline);
+});

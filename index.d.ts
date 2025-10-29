@@ -81,8 +81,19 @@ export interface IQavajsWorld extends IWorld {
      * Execute existing step definition
      * @param {string} step - cucumber expression to execute
      * @param {DataTable | string} extraParam - extra data table or multiline string
+     * @example
+     * this.executeStep(`I click 'Login Button'`);
      */
     executeStep(step: string, extraParam?: DataTable | string): Promise<void>;
+
+    /**
+     * Execute test by provided path and test title
+     * @param {string} path - feature file path
+     * @param {string} title - test title
+     * @example
+     * this.executeTest('features/Login.feature', 'Login');
+     */
+    executeTest(path: string, title: string): Promise<void>;
 
     /**
      * Return validation function by provided type

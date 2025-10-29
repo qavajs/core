@@ -107,3 +107,15 @@ When('I click {string} and verify {string}', Template((locator: string, expected
 When('log {string}', function (value: string) {
    this.log(value);
 });
+
+When('dependency {string} {string}', async function (this: IQavajsWorld, path: string, title: string) {
+    await this.executeTest(path, title);
+});
+
+When('data table step:', function (dataTable: DataTable) {
+    console.log(dataTable);
+});
+
+When('multiline step:', function (multiline: string) {
+    console.log(multiline);
+});

@@ -10,7 +10,8 @@ import TestCaseRunner from '@cucumber/cucumber/lib/runtime/test_case_runner';
 import memory from '@qavajs/memory';
 import { getValidation, getPollValidation } from '@qavajs/validation';
 import { importConfig, importMemory } from './importConfig';
-import { IQavajsWorld, Validation } from './IQavajsWorld';
+import type { IQavajsWorld, Validation } from './IQavajsWorld';
+import { executeTest } from './executeTest';
 const configPath = process.env.CONFIG as string;
 const profile = process.env.PROFILE as string;
 const config = importConfig(configPath, profile);
@@ -114,6 +115,7 @@ Before({name: 'qavajs init'}, async function (this: IQavajsWorld, scenario) {
   memory.register(Object.assign({}, ...memoryInstances, memoryValues));
   this.memory = memory;
   this.executeStep = executeStep;
+  this.executeTest = executeTest;
   this.getValue = getValue;
   this.setValue = setValue;
   this.validation = function (type: string) {
