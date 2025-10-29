@@ -11,7 +11,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :microscope: - experimental
 
 ## [2.11.0]
-- added `executeTest` world method that allow to call other test from feature file
+- :microscope: added `executeTest` world method that allow to call other test from feature file
 ```javascript
 When('I do smth very complex', async function() {
     await this.executeTest(`features/Login.feature`, `Login Test`);
