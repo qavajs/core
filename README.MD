@@ -63,18 +63,9 @@ Feature: Feature
     And I expect '1' to softly equal '1'
 ```
 
-### Test Sharding
-qavajs provides the ability to shard your tests between different machines. To do so pass `--shard x/y` parameter in CLI,
-where x - current shard, y - total number of shards.
-
-```bash
-npx qavajs --config config.js --shard 1/2
-npx qavajs --config config.js --shard 2/2
-```
-
 ### Execute steps from other steps
 It is possible to implement complex logic using built-in qavajs steps via `executeStep` world method
-```javascript
+```typescript
 When('I do smth complex', async function() {
     await this.executeStep(`I type 'username' to 'Username Input'`);
     await this.executeStep(`I type 'password' to 'Password Input'`);
@@ -86,8 +77,16 @@ When('I do smth complex', async function() {
 });
 ```
 
+### Execute other tests
+Also, it is possible to call other test cases via `executeTest` world method
+```typescript
+When('I do smth complex', async function() {
+    await this.executeTest('feature/Login.feature', 'Login');
+});
+```
+
 ### Override step definition
-`Override` function provides capability to override step implementation and avoid ambiguous exception
+`Override` function provides the capability to override step implementation and avoid ambiguous exceptions
 
 ```typescript
 import { Override } from '@qavajs/core';
