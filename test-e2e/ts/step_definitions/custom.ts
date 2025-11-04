@@ -1,4 +1,5 @@
 import { DataTable, When } from '@cucumber/cucumber';
+// @ts-ignore
 import { expect } from 'chai';
 import memory from '@qavajs/memory';
 import { Override } from '../../../utils';

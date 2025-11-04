@@ -3,7 +3,7 @@ import { join } from 'node:path';
 let loadTS = true;
 async function importTS(configPath: string) {
     if (loadTS) {
-        require('ts-node').register({ swc: true });
+        require('ts-node').register();
         loadTS = false;
     }
     return require(configPath)
