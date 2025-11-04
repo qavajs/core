@@ -6,13 +6,18 @@
     "test/**/*.spec.ts"
   ],
   "compilerOptions": {
-    "target": "es2017",
+    "target": "es2023",
     "module": "node16",
     "moduleResolution": "node16",
     "outDir": "./lib",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "declaration": true,
+    "types": [
+      "node"
+    ]
   }
 }

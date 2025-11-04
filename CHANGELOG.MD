@@ -9,7 +9,20 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :x: - deprecation
 :pencil: - chore
 
-## [Unreleased]
+## [1.0.1]
+- :x: removed hardcoded `swc` flag in favor of project specific configuration
+```json
+{
+  "ts-node": {
+    "swc": true,
+    "compilerOptions": {
+      "target": "es2020"
+    }
+  }
+}
+```
+
+## [1.0.0]
 - :pencil: updated dependencies
 
 ## 0.40.0
