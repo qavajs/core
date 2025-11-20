@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.12.0]
+- :rocket: added `to deeply strictly equal` matcher
+
 ## [2.11.0]
 - :microscope: added `executeTest` world method that allow to call other test from feature file
 ```javascript
