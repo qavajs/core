@@ -87,7 +87,7 @@ defineParameterType({
 
 defineParameterType({
   name: 'validation',
-  regexp: /((?:is |do |does |to )?(not |to not )?(?:to )?(?:be )?(softly )?(equal|strictly equal|deeply equal|have member|match|contain|above|below|greater than|less than|have type|have property|match schema|include members|satisfy|case insensitive equal)(?:s|es| to)?)/,
+  regexp: /((?:is |do |does |to )?(not |to not )?(?:to )?(?:be )?(softly )?(equal|strictly equal|deeply equal|have member|match|contain|above|below|greater than|less than|have type|have property|match schema|include members|satisfy|case insensitive equal|deeply strictly equal)(?:s|es| to)?)/,
   transformer: type => {
     const validation = getValidation(type) as Validation;
     validation.poll = getPollValidation(type);
