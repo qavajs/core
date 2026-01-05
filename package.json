@@ -49,16 +49,16 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^12.2.0",
+    "@cucumber/cucumber": "^12.5.0",
     "@qavajs/console-formatter": "^1.1.1",
-    "@swc/core": "^1.15.3",
-    "@types/node": "^24.10.1",
+    "@swc/core": "^1.15.8",
+    "@types/node": "^25.0.3",
     "@types/yargs": "^17.0.35",
-    "@vitest/coverage-v8": "^4.0.14",
-    "@vitest/ui": "^4.0.14",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.16"
   },
   "keywords": [
     "test",
