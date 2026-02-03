@@ -10,6 +10,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.13.0]
+Breaking Change:
+- :microscope: updated `Fixture` signature to explicitly provide tag expression
+```typescript
+import { Fixture } from '@qavajs/core';
+
+Fixture({ name: 'pdp', tags: '@pdp' }, async function() {
+    await this.playwright.page.goto('https://my-site/pdp');
+    // fixture may return function that will be executed after test
+    return async function() {
+        await this.playwright.page.request.get('/cleanCart');
+    }
+});
+```
+
 ## [2.12.0]
 - :rocket: added `to deeply strictly equal` matcher
 

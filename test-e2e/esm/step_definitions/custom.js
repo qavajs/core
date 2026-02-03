@@ -12,7 +12,7 @@ AfterExecution(async function () {
     expect(valueInCoordinator).toEqual(1);
 });
 
-Fixture('testFixture', async function() {
+Fixture({ name: 'testFixture', tags: '@testFixture' }, async function() {
     console.log('setup test fixture');
     this.memory.setValue('valueFromFixture', 'qavajsFixture');
     return function () {

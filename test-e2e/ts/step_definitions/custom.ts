@@ -23,7 +23,7 @@ AfterExecution(async function () {
     expect(valueInCoordinator).toEqual(1);
 });
 
-Fixture('testFixture', async function(this: IQavajsWorld) {
+Fixture({ name: 'testFixture', tags: '@testFixture' }, async function(this: IQavajsWorld) {
     console.log('setup test fixture');
     this.memory.setValue('valueFromFixture', 'qavajsFixture');
     return function () {
