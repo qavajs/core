@@ -1,6 +1,6 @@
 {
   "name": "@qavajs/core",
-  "version": "2.12.0",
+  "version": "2.13.0",
   "description": "qavajs framework core",
   "scripts": {
     "build": "tsc",
@@ -49,16 +49,16 @@
     "yargs": "^18.0.0"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^12.5.0",
+    "@cucumber/cucumber": "^12.6.0",
     "@qavajs/console-formatter": "^1.1.1",
-    "@swc/core": "^1.15.8",
-    "@types/node": "^25.0.3",
+    "@swc/core": "^1.15.11",
+    "@types/node": "^25.2.0",
     "@types/yargs": "^17.0.35",
-    "@vitest/coverage-v8": "^4.0.16",
-    "@vitest/ui": "^4.0.16",
+    "@vitest/coverage-v8": "^4.0.18",
+    "@vitest/ui": "^4.0.18",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.18"
   },
   "keywords": [
     "test",

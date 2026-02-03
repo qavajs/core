@@ -105,7 +105,7 @@ This example will open pdp page before test and clean the cart after the test
 ```typescript
 import { Fixture } from '@qavajs/core';
 
-Fixture('pdp', async function() {
+Fixture({ name: 'pdp', tags: '@pdp' }, async function() {
     await this.playwright.page.goto('https://my-site/pdp');
     // fixture may return function that will be executed after test
     return async function() {
