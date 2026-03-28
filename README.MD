@@ -2,130 +2,249 @@
 
 ## @qavajs/core
 
-`@qavajs/core` is the core and test runner module of the [qavajs](https://github.com/qavajs) automation framework.
-          
+`@qavajs/core` is the core test runner module of the [qavajs](https://github.com/qavajs) automation framework.
+It extends [CucumberJS](https://github.com/cucumber/cucumber-js) with memory management, validation utilities,
+fixtures, templates, services, and test composition — all with full ESM, CJS, and TypeScript support.
+
+**Requirements**: Node.js >= 20
+
+---
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Running Tests](#running-tests)
+- [Configuration](#configuration)
+- [World Extensions](#world-extensions)
+- [Memory Value Parameter Type](#memory-value-parameter-type)
+- [Validation Parameter Type](#validation-parameter-type)
+- [Soft Validation](#soft-validation)
+- [Execute Steps from Other Steps](#execute-steps-from-other-steps)
+- [Execute Other Tests](#execute-other-tests)
+- [Override Step Definition](#override-step-definition)
+- [Fixture](#fixture)
+- [Template](#template)
+- [Test Execution Hooks](#test-execution-hooks)
+- [Service](#service)
+- [Override Memory Values via CLI](#override-memory-values-via-cli)
+- [Pass CLI Params to Workers](#pass-cli-params-to-workers)
+
+---
+
+## Installation
+
 ```bash
 npm install @qavajs/core
 ```
 
-Run tests
+---
+
+## Running Tests
 
 ```bash
-npx qavajs --config <config> --profile <profile>
+npx qavajs run --config <config> --profile <profile>
 ```
 
-### Memory value parameter type
-`value` parameter type provides API to access memory
+`cucumber-js` is also available as an alias:
+
+```bash
+npx cucumber-js run --config <config>
+```
+
+---
+
+## Configuration
+
+Config files can be written in JS, CJS, TS, or ESM format.
+
+```typescript
+// config.ts
+export default {
+    paths: ['features/**/*.feature'],
+    require: ['step_definitions/**/*.ts'],
+    memory: new Memory(),
+    defaultTimeout: 30_000,
+    service: [],
+    serviceTimeout: 60_000
+}
+```
+
+| Property         | Type     | Default    | Description                                          |
+|------------------|----------|------------|------------------------------------------------------|
+| `memory`         | object   | `{}`       | Memory instance for storing/retrieving test values   |
+| `defaultTimeout` | number   | `10_000`   | Default step timeout in milliseconds                 |
+| `service`        | array    | `[]`       | Services with `before`/`after` lifecycle hooks       |
+| `serviceTimeout` | number   | `60_000`   | Timeout for service `before`/`after` in milliseconds |
+
+All standard [CucumberJS configuration options](https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md) are also supported.
+
+---
+
+## World Extensions
+
+`@qavajs/core` extends the CucumberJS `World` with additional properties and methods:
+
+| Entity        | Type     | Description                                         | Example                                                              |
+|---------------|----------|-----------------------------------------------------|----------------------------------------------------------------------|
+| `config`      | object   | Loaded configuration object                         | `this.config.parallel`                                               |
+| `memory`      | object   | Memory instance                                     | `this.memory.$key`                                                   |
+| `executeStep` | function | Programmatically execute a step definition          | `await this.executeStep("I type 'user' to 'Username Input'");`       |
+| `executeTest` | function | Execute another test scenario by path and title     | `await this.executeTest('feature/Login.feature', 'Login scenario');` |
+| `setValue`    | function | Set a value in memory                               | `this.setValue('key', 'value');`                                     |
+| `getValue`    | function | Get a memory value or resolve an expression         | `await this.getValue('$key');`                                       |
+| `validation`  | function | Get a validation function by type                   | `const fn = await this.validation('to equal');`                      |
+
+TypeScript users can import the `IQavajsWorld` interface:
+
+```typescript
+import { IQavajsWorld } from '@qavajs/core';
+
+When('I do something', async function(this: IQavajsWorld) {
+    const value = await this.getValue('$myKey');
+});
+```
+
+---
+
+## Memory Value Parameter Type
+
+The `{value}` parameter type provides access to the memory layer. It resolves a memory expression at runtime, and also exposes a `set` method to write values back.
 
 ```javascript
-When('Read memory {value}', async function(memoryValue) {
-    expect(memoryValue.value()).toEqual('ts');
+When('I read memory {value}', async function(memoryValue) {
+    expect(memoryValue.value()).toEqual('expectedValue');
 });
 
-When('Set memory {value} as {string}', async function(memoryKey, value) {
+When('I set memory {value} as {string}', async function(memoryKey, value) {
     memoryKey.set(value);
 });
 ```
 
-### Validation parameter type
-`validation` parameter type provides an API to verify values by a certain condition
+---
+
+## Validation Parameter Type
+
+The `{validation}` parameter type provides assertion functions for comparing two values. It supports both instant and polling-based verification.
 
 ```javascript
-When('I expect {string} {validation} {string}', async function(value1, validate, value2) {
-    validate(value1, value2);
+When('I expect {string} {validation} {string}', async function(actual, validate, expected) {
+    validate(actual, expected);
 });
 ```
 
-### World
-Module extends CucumberJS world with additional entities
+**Polling validation** retries until the condition is met or a timeout is reached:
 
-| entity      | type     | description                                      | example                                                            |
-|-------------|----------|--------------------------------------------------|--------------------------------------------------------------------|
-| config      | object   | loaded config                                    | `this.config.parallel`                                             |
-| executeStep | function | programmatically execute certain step definition | `await this.executeStep("I type 'username' to 'Username Input'");` |
-| setValue    | function | set memory value                                 | `await this.setValue('key', 'value');`                             |
-| getValue    | function | get memory value or expression                   | `await this.getValue('$key');`                                     |
-| validation  | function | get validation function based                    | `await this.validation('to equal');`                               |
+```javascript
+When('I poll-expect {string} {validation} {string}', async function(actual, validate, expected) {
+    await validate.poll(
+        () => actual,
+        expected,
+        { timeout: 5000, interval: 500 }
+    );
+});
+```
 
-### Soft Validation
-You can use the `softly` prefix before expect.
+---
+
+## Soft Validation
+
+Prefix any validation step with `softly` to allow the scenario to continue even when an assertion fails.
+All soft failures are collected and reported at the end of the scenario.
+
 ```gherkin
-Feature: Feature
+Feature: Soft assertions example
 
   Scenario: verify soft assert
-    # first step fails, but other steps will not be skipped
-    Then I expect '2' to softly equal '1'
-    # pass
-    And I expect '1' to softly equal '1'
-    # fail
-    And I expect '2' to softly equal '1'
-    # skip
-    And I expect '1' to softly equal '1'
+    Then I expect '2' to softly equal '1'  # fails, but execution continues
+    And  I expect '1' to softly equal '1'  # passes
+    And  I expect '2' to softly equal '1'  # fails
+    And  I expect '1' to softly equal '1'  # passes — all failures reported at end
 ```
 
-### Execute steps from other steps
-It is possible to implement complex logic using built-in qavajs steps via `executeStep` world method
+---
+
+## Execute Steps from Other Steps
+
+Use `this.executeStep` to compose complex step logic from existing steps:
+
 ```typescript
-When('I do smth complex', async function() {
-    await this.executeStep(`I type 'username' to 'Username Input'`);
-    await this.executeStep(`I type 'password' to 'Password Input'`);
+When('I log in as {string}', async function(username: string) {
+    await this.executeStep(`I type '${username}' to 'Username Input'`);
+    await this.executeStep(`I type 'secret' to 'Password Input'`);
     await this.executeStep(`I click 'Login Button'`);
     await this.executeStep(`I fill following fields`, new DataTable([
-        [ 'Order', '123' ],
-        [ 'Delivery Location', 'New York' ]
-    ]))
+        ['Order', '123'],
+        ['Delivery Location', 'New York']
+    ]));
 });
 ```
 
-### Execute other tests
-Also, it is possible to call other test cases via `executeTest` world method
+---
+
+## Execute Other Tests
+
+Use `this.executeTest` to call another test scenario from within a scenario:
+
 ```typescript
-When('I do smth complex', async function() {
-    await this.executeTest('feature/Login.feature', 'Login');
+When('I complete checkout', async function() {
+    await this.executeTest('features/Login.feature', 'User logs in');
+    await this.executeTest('features/Cart.feature', 'User adds item to cart');
 });
 ```
 
-### Override step definition
-`Override` function provides the capability to override step implementation and avoid ambiguous exceptions
+---
+
+## Override Step Definition
+
+`Override` replaces an existing step implementation without causing an ambiguous step error.
+Useful when extending a shared library's steps with project-specific behavior.
 
 ```typescript
 import { Override } from '@qavajs/core';
 
-When('I do test', async function () {});
+// original step from a shared library
+When('I do test', async function() {});
 
-Override('I do test', async function () {
-    console.log('I am overridden');
+// replace it without conflicts
+Override('I do test', async function() {
+    console.log('overridden implementation');
 });
 ```
 
-### Fixture
-`Fixture` provides a convenient way to prepare a test environment for specific test.
+---
 
-This example will open pdp page before test and clean the cart after the test
+## Fixture
+
+`Fixture` prepares the test environment for scenarios with a specific tag. An optional return value is treated as a teardown function executed after the scenario.
+
 ```typescript
 import { Fixture } from '@qavajs/core';
 
 Fixture({ name: 'pdp', tags: '@pdp' }, async function() {
     await this.playwright.page.goto('https://my-site/pdp');
-    // fixture may return function that will be executed after test
+
+    // teardown: runs after the scenario
     return async function() {
         await this.playwright.page.request.get('/cleanCart');
-    }
+    };
 });
 ```
 
 ```gherkin
-Feature: feature with fixture
+Feature: Product page
 
   @pdp
-  Scenario: scenario with fixture
+  Scenario: Add item to cart
     When I click 'qavajs T-shirt'
-    And I click 'cart icon'
+    And  I click 'cart icon'
     Then I expect 'qavajs T-shirt cart item' to be visible
 ```
 
-### Template
-`Template` provides a way to define step definition using Gherkin language
+---
+
+## Template
+
+`Template` lets you define a step by composing existing Gherkin steps, keeping step definitions DRY.
 
 ```typescript
 import { When, Template } from '@qavajs/core';
@@ -136,9 +255,12 @@ When('I click {string} and verify {string}', Template((locator, expected) => `
 `));
 ```
 
-### Test Execution Hooks
-`BeforeExecution` and `AfterExecution` allow to define hooks that will be executed 
-once before/after the whole test execution
+---
+
+## Test Execution Hooks
+
+`BeforeExecution` and `AfterExecution` run once before or after the entire test run — useful for
+starting/stopping infrastructure that must outlive individual scenarios.
 
 ```typescript
 import { BeforeExecution, AfterExecution } from '@qavajs/core';
@@ -146,30 +268,21 @@ import { Server } from './server';
 
 const server = new Server();
 
-BeforeExecution(async function () {
+BeforeExecution(async function() {
     await server.start();
 });
 
-AfterExecution(async function () {
+AfterExecution(async function() {
     await server.stop();
 });
 ```
 
-### Override memory values
-In case if tests need to be run with updated memory value they can be passed via CLI (e.g run scenarios on some other url)
-It can be done by passing `--memory-values` parameter which is JSON with params that need to be overridden
+---
 
-```
-npx qavajs --config config.ts --memory-values '{"url": "https://github.com"}'
-``` 
+## Service
 
-it will override $url memory value
-
-### Pass CLI params to workers
-All params that you passed to qavajs cli will be available in CLI_ARGV environment variable in all child workers.
-
-### Service
-Services are entities that can execute logic before and after the whole test run.
+Services provide `before`/`after` lifecycle hooks for the full test run. They have access to a typed
+`options` context and receive the run result in `after`.
 
 ```typescript
 import externalService from './externalService';
@@ -177,29 +290,46 @@ import externalService from './externalService';
 export default {
     service: [
         {
-            options: {
-                data: 42
+            options: { baseUrl: 'https://api.example.com' },
+            async before() {
+                console.log('Starting with', this.options.baseUrl);
             },
-            before() {
-                console.log(this.options.data);
-            },
-            after(result) {
+            async after(result) {
                 if (!result.success) process.exitCode = 1;
             }
         },
         {
-            options: {
-                data: 42
-            },
+            options: { data: 42 },
             ...externalService
         }
     ]
 }
 ```
-There is a one-minute default timeout for the before and after test logic to prevent the entire process from freezing.
-To set up a custom timeout in milliseconds, use `serviceTimeout` property in the config file
+
+Services have a **default timeout of 60 seconds**. Override it with `serviceTimeout` (in milliseconds):
+
 ```typescript
 export default {
-    serviceTimeout: 1_200_000
+    serviceTimeout: 120_000  // 2 minutes
 }
 ```
+
+---
+
+## Override Memory Values via CLI
+
+Pass a JSON object via `--memory-values` to override specific memory keys at runtime — useful for
+running the same suite against different environments.
+
+```bash
+npx qavajs run --config config.ts --memory-values '{"url": "https://staging.example.com"}'
+```
+
+This overrides `$url` in the memory layer for the entire test run.
+
+---
+
+## Pass CLI Params to Workers
+
+All CLI arguments passed to `qavajs` are forwarded to child workers via the `CLI_ARGV` environment variable,
+allowing step definitions and config files running in worker processes to read them.
