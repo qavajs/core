@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.14.0]
+- :x: removed `chalk` and `yargs` dependencies in favor of Node.js built-ins (`util.parseArgs`, ANSI escape codes)
+
 ## [2.13.0]
 Breaking Change:
 - :microscope: updated `Fixture` signature to explicitly provide tag expression

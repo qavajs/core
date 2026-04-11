@@ -1,9 +1,7 @@
 import run from './run';
-const chalk = import('chalk').then(m => m.default);
 
 async function main() {
-    const { bold, cyan } = await chalk;
-    console.log(bold(cyan(`@qavajs/core (v${require('../package.json').version})`)));
+    console.log(`\x1b[1m\x1b[36m@qavajs/core (v${require('../package.json').version})\x1b[0m`);
     return run();
 }
 

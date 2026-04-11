@@ -4,7 +4,6 @@ import { importConfig } from './importConfig';
 import { IRunResult } from '@cucumber/cucumber/api';
 import { cliOptions } from './cliOptions';
 import { existsSync } from 'node:fs';
-const chalkModule = import('chalk').then(m => m.default);
 
 /**
  * Merge json like params passed from CLI
@@ -74,7 +73,7 @@ function getConfig(argvConfig?: string) {
     throw new Error('No config provided');
 }
 
-export async function run({runCucumber, loadConfiguration, loadSources, loadSupport}: any, chalk: any): Promise<void> {
+export async function run({runCucumber, loadConfiguration, loadSources, loadSupport}: any): Promise<void> {
     const argv: any = cliOptions(process.argv);
     process.env.CONFIG = getConfig(argv.config);
     process.env.PROFILE = argv.profile ?? 'default';
@@ -110,7 +109,7 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     runConfiguration.support = supportCode;
     await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
     const { plan } = await loadSources(runConfiguration.sources);
-    console.log(chalk.blue(`Test Cases: ${plan.length}`));
+    console.log(`\x1b[34mTest Cases: ${plan.length}\x1b[0m`);
     const result: IRunResult = await runCucumber(runConfiguration, environment);
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
@@ -121,9 +120,8 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
 }
 
 export default async function (): Promise<void> {
-    const chalk = await chalkModule;
     const cucumber = await import('@cucumber/cucumber/api');
-    await run(cucumber, chalk);
+    await run(cucumber);
 }
 
 async function prepareSupportCode(loadSupport: any, runConfiguration: any) {

@@ -14,6 +14,7 @@ fixtures, templates, services, and test composition — all with full ESM, CJS, 
 
 - [Installation](#installation)
 - [Running Tests](#running-tests)
+  - [CLI Options](#cli-options)
 - [Configuration](#configuration)
 - [World Extensions](#world-extensions)
 - [Memory Value Parameter Type](#memory-value-parameter-type)
@@ -50,6 +51,34 @@ npx qavajs run --config <config> --profile <profile>
 ```bash
 npx cucumber-js run --config <config>
 ```
+
+### CLI Options
+
+| Flag | Type | Description |
+|------|------|-------------|
+| `--config` | string | Config file path |
+| `--profile` | string | Profile name to run |
+| `--paths` | string[] | Paths to feature files |
+| `--tags`, `-t` | string[] | Tag expression filter (multiple flags are ANDed) |
+| `--format`, `-f` | string[] | Formatter name/path and optional output file |
+| `--format-options` | string | JSON options for formatters |
+| `--import`, `-i` | string[] | Support code paths (ESM) |
+| `--require`, `-r` | string[] | Support code paths (CJS) |
+| `--require-module` | string[] | Transpilation modules to load via `require()` |
+| `--name` | string[] | Scenario name regex filters |
+| `--order` | string | Run order (`defined` or `random`) |
+| `--parallel` | number | Number of worker processes |
+| `--retry` | number | Retry failing tests N times |
+| `--retry-tag-filter` | string[] | Tag expression for retryable scenarios |
+| `--dry-run`, `-d` | boolean | Prepare run without executing |
+| `--backtrace`, `-b` | boolean | Show full error backtraces |
+| `--fail-fast` | boolean | Stop on first failure |
+| `--force-exit` | boolean | Call `process.exit()` after run |
+| `--strict` | boolean | Fail on pending steps |
+| `--shard` | string | Shard tests (`x/y`) |
+| `--world-parameters` | string | JSON parameters passed to World |
+| `--memory-values` | string | JSON values to override in memory |
+| `--no-error-exit` | boolean | Suppress non-zero exit code on test failure |
 
 ---
 

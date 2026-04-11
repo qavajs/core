@@ -1,5 +1,4 @@
 import path from 'node:path';
-import { importConfig } from './importConfig';
 import { IRunResult } from '@cucumber/cucumber/api';
 
 export default class ServiceHandler {

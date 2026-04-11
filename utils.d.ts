@@ -1,3 +1,3 @@
-import { IDefineStep } from '@cucumber/cucumber/lib/support_code_library_builder/types';
+import type { defineStep } from '@cucumber/cucumber';
 
-export const Override: IDefineStep;
+export const Override: typeof defineStep;
