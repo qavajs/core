@@ -47,7 +47,7 @@
     "@qavajs/validation": "^1.6.2"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^12.7.0",
+    "@cucumber/cucumber": "^12.8.1",
     "@qavajs/console-formatter": "^1.2.0",
     "@swc/core": "^1.15.24",
     "@types/node": "^25.6.0",
