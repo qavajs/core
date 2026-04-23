@@ -24,9 +24,10 @@ describe('Fixture', () => {
 
     const beforeHandler = beforeSpy.mock.calls[0][1];
     const afterHandler = afterSpy.mock.calls[0][1];
-    const world = { token: 'w' };
+    const world: any = { token: 'w' };
 
     await beforeHandler.call(world);
+    expect(world['__fixtureTearDown_sample']).toBe(teardown);
     await afterHandler.call(world);
 
     expect(setup).toHaveBeenCalledTimes(1);

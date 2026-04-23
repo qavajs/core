@@ -1,12 +1,13 @@
 import { defineStep, supportCodeLibraryBuilder } from '@cucumber/cucumber';
 
 export function Override(pattern: string | RegExp, ...rest: any[]): void {
-    // @ts-ignore
-    const definitionIndex = supportCodeLibraryBuilder.stepDefinitionConfigs.findIndex(
+    const configs = (supportCodeLibraryBuilder as any).stepDefinitionConfigs;
+    if (!Array.isArray(configs)) {
+        throw new Error('Override is not compatible with this version of @cucumber/cucumber');
+    }
+    const definitionIndex = configs.findIndex(
         (definition: { pattern: string | RegExp }) => definition.pattern === pattern
     );
-    // @ts-ignore
-    supportCodeLibraryBuilder.stepDefinitionConfigs.splice(definitionIndex, 1);
-    // @ts-ignore
-    defineStep(pattern, ...rest);
+    configs.splice(definitionIndex, 1);
+    (defineStep as any)(pattern, ...rest);
 }

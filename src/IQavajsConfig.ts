@@ -1,5 +1,12 @@
 import { IConfiguration, IRunResult } from '@cucumber/cucumber/api';
 
+export type ServiceObject = {
+    before?: () => void | Promise<void>;
+    after?: (result: IRunResult) => void | Promise<void>;
+};
+
+export type ServiceDefinition = string | [string, object] | ServiceObject;
+
 export interface IQavajsConfig extends Partial<IConfiguration> {
     /**
      * instance of memory object
@@ -27,6 +34,7 @@ export interface IQavajsConfig extends Partial<IConfiguration> {
      * Qavajs services
      *
      * default: []
+     * @deprecated Use BeforeExecution/AfterExecution hooks instead
      * @example
      * export default {
      *     service: [{
@@ -39,11 +47,12 @@ export interface IQavajsConfig extends Partial<IConfiguration> {
      *     }]
      * }
      */
-    service?: Array<{ before?: () => void, after: (result: IRunResult) => void }>,
+    service?: Array<ServiceDefinition>,
     /**
      * Qavajs service timeout
      *
-     * default: []
+     * default: 60_000
+     * @deprecated Use BeforeExecution/AfterExecution hooks instead
      * @example
      * export default {
      *     service: [{

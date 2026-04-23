@@ -1,9 +1,11 @@
 import path from 'node:path';
 import { IRunResult } from '@cucumber/cucumber/api';
+import type { IQavajsConfig, ServiceObject } from './IQavajsConfig';
 
+/** @deprecated Use BeforeExecution/AfterExecution hooks instead */
 export default class ServiceHandler {
-    readonly services: Promise<Array<Service>>;
-    constructor(private config: Config) {
+    readonly services: Promise<Array<ServiceObject>>;
+    constructor(private config: IQavajsConfig) {
         this.services = this.loadServices();
     }
 
