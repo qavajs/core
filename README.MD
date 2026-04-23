@@ -93,8 +93,6 @@ export default {
     require: ['step_definitions/**/*.ts'],
     memory: new Memory(),
     defaultTimeout: 30_000,
-    service: [],
-    serviceTimeout: 60_000
 }
 ```
 
@@ -102,8 +100,8 @@ export default {
 |------------------|----------|------------|------------------------------------------------------|
 | `memory`         | object   | `{}`       | Memory instance for storing/retrieving test values   |
 | `defaultTimeout` | number   | `10_000`   | Default step timeout in milliseconds                 |
-| `service`        | array    | `[]`       | Services with `before`/`after` lifecycle hooks       |
-| `serviceTimeout` | number   | `60_000`   | Timeout for service `before`/`after` in milliseconds |
+| ~~`service`~~    | array    | `[]`       | **Deprecated.** Use `BeforeExecution`/`AfterExecution` instead |
+| ~~`serviceTimeout`~~ | number | `60_000` | **Deprecated.** Use `BeforeExecution`/`AfterExecution` instead |
 
 All standard [CucumberJS configuration options](https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md) are also supported.
 
@@ -309,6 +307,9 @@ AfterExecution(async function() {
 ---
 
 ## Service
+
+> **Deprecated** — `service` and `serviceTimeout` are deprecated and will be removed in a future version.
+> Use [`BeforeExecution`/`AfterExecution` hooks](#test-execution-hooks) instead.
 
 Services provide `before`/`after` lifecycle hooks for the full test run. They have access to a typed
 `options` context and receive the run result in `after`.

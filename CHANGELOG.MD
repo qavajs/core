@@ -10,6 +10,16 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.15.0]
+- :x: deprecated `service` and `serviceTimeout` config options in favor of `BeforeExecution`/`AfterExecution` hooks
+- :beetle: fixed `Fixture` teardown being shared across parallel scenarios — teardown reference is now stored per world instance
+- :beetle: fixed `process.env.DEFAULT_TIMEOUT` being assigned a number instead of a string
+- :beetle: fixed empty `--tags` array producing an empty tag expression instead of no filter
+- :pencil: `ServiceDefinition` and `ServiceObject` types are now exported from `IQavajsConfig`; `service` field type updated to reflect all accepted forms (`string`, `[string, object]`, or service object)
+- :pencil: soft assertion Cucumber patch and `Override` now validate internal API availability at runtime and fail with a descriptive error if the API has changed
+- :pencil: `BeforeExecution`/`AfterExecution` coordinator check moved from module load time to call time
+- :pencil: replaced `require('../package.json')` with a typed `import` in entry point
+
 ## [2.14.0]
 - :x: removed `chalk` and `yargs` dependencies in favor of Node.js built-ins (`util.parseArgs`, ANSI escape codes)
 

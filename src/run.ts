@@ -83,12 +83,12 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     const serviceHandler = new ServiceHandler(config);
     const serviceTimeout = config.serviceTimeout ?? 60_000
     const timeoutMessage = `Service timeout '${serviceTimeout}' ms exceeded`;
-    process.env.DEFAULT_TIMEOUT = config.defaultTimeout ?? 10_000;
+    process.env.DEFAULT_TIMEOUT = String(config.defaultTimeout ?? 10_000);
     await timeout(serviceHandler.before(), serviceTimeout, timeoutMessage);
     const memoryLoadHook = resolve(__dirname, './load.js');
     if (argv.formatOptions) argv.formatOptions = mergeJSONParams(argv.formatOptions);
     if (argv.worldParameters) argv.worldParameters = mergeJSONParams(argv.worldParameters);
-    if (argv.tags instanceof Array) argv.tags = mergeTags(argv.tags);
+    if (argv.tags instanceof Array) argv.tags = argv.tags.length > 0 ? mergeTags(argv.tags) : undefined;
     const environment = {
         cwd: process.cwd(),
         stdout: process.stdout,

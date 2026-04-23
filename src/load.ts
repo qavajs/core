@@ -5,8 +5,6 @@ import {
   setDefaultTimeout,
   supportCodeLibraryBuilder,
 } from '@cucumber/cucumber';
-import TestCaseRunner from '@cucumber/cucumber/lib/runtime/test_case_runner';
-
 import memory from '@qavajs/memory';
 import { getValidation, getPollValidation } from '@qavajs/validation';
 import { importConfig, importMemory } from './importConfig';
@@ -17,11 +15,18 @@ const profile = process.env.PROFILE as string;
 const config = importConfig(configPath, profile);
 const memoryValues = JSON.parse(process.env.MEMORY_VALUES as string);
 
-// soft error cucumber patch
-TestCaseRunner.prototype.isSkippingSteps = function (this: any) {
-  return this.testStepResults.some((stepResult: any) => {
-    return !['PASSED', 'FAILED'].includes(stepResult.status) || (stepResult.status === 'FAILED' && stepResult.exception?.type !== 'SoftAssertionError')
-  });
+try {
+  const TestCaseRunner = require('@cucumber/cucumber/lib/runtime/test_case_runner').default;
+  if (typeof TestCaseRunner?.prototype?.isSkippingSteps !== 'function') {
+    throw new Error('isSkippingSteps is not a function');
+  }
+  TestCaseRunner.prototype.isSkippingSteps = function (this: any) {
+    return this.testStepResults.some((stepResult: any) => {
+      return !['PASSED', 'FAILED'].includes(stepResult.status) || (stepResult.status === 'FAILED' && stepResult.exception?.type !== 'SoftAssertionError')
+    });
+  };
+} catch {
+  console.warn('[qavajs] soft assertion step-continuation is not available on this version of @cucumber/cucumber');
 }
 
 export async function executeStep(this: any, text: string, extraParam?: DataTable | string) {
