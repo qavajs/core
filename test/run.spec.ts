@@ -38,6 +38,27 @@ test('exitCode=1 if scenario failed', async () => {
     expect(process.exitCode).to.equal(1);
 });
 
+test('formatOptions from config is passed to loadConfiguration', async () => {
+    process.argv.push('--config');
+    process.argv.push('config.ts');
+    vi.mocked(importConfig).mockResolvedValue({
+        service: [],
+        formatOptions: { colorsEnabled: true }
+    });
+    const loadConfigurationMock = vi.fn().mockReturnValue({
+        runConfiguration: { support: { requireModules: [] } }
+    });
+    const cucumberMock = {
+        runCucumber: vi.fn().mockReturnValue({ success: true }),
+        loadConfiguration: loadConfigurationMock,
+        loadSources: vi.fn().mockReturnValue({ plan: [] }),
+        loadSupport: vi.fn().mockReturnValue(supportMock)
+    };
+    await run(cucumberMock);
+    const [options] = loadConfigurationMock.mock.calls[0];
+    expect(options.provided.formatOptions).toEqual({ colorsEnabled: true });
+});
+
 test('exitCode=0 if passed --no-error-exit', async () => {
     process.argv.push('--no-error-exit');
     process.argv.push('--config')
