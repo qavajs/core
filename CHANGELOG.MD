@@ -10,7 +10,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.15.1]
+- :beetle: fixed `deepMerge` overwriting config file options (e.g. `formatOptions`, `worldParameters`) with `undefined` when the corresponding CLI flag is absent
+
 ## [2.15.0]
+
 - :x: deprecated `service` and `serviceTimeout` config options in favor of `BeforeExecution`/`AfterExecution` hooks
 - :beetle: fixed `Fixture` teardown being shared across parallel scenarios — teardown reference is now stored per world instance
 - :beetle: fixed `process.env.DEFAULT_TIMEOUT` being assigned a number instead of a string

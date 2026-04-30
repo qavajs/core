@@ -43,7 +43,7 @@ function deepMerge(target: any, ...sources: any[]) {
             } else if (Array.isArray(source[key])) {
                 if (!Array.isArray(target[key])) target[key] = [];
                 target[key] = target[key].concat(source[key]);
-            } else {
+            } else if (source[key] !== undefined) {
                 Object.assign(target, { [key]: source[key] });
             }
         }
