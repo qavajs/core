@@ -94,8 +94,8 @@ function printConfigTable(config: Record<string, any>, testCount: number, profil
     const vw = Math.max(...rows.map(([, v]) => v.length));
     const dim = '\x1b[2m', bold = '\x1b[1m', cyan = '\x1b[36m', reset = '\x1b[0m';
     const h = '─';
-    const innerWidth = kw + vw + 5;
     const title = `@qavajs/core (v${version})`;
+    const innerWidth = Math.max(kw + vw + 5, title.length + 2);
     const titlePad = innerWidth - 2 - title.length;
     const top    = `${dim}┌${h.repeat(innerWidth)}┐${reset}`;
     const mid    = `${dim}├${h.repeat(kw + 2)}┬${h.repeat(vw + 2)}┤${reset}`;
