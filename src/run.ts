@@ -4,6 +4,7 @@ import { importConfig } from './importConfig';
 import { IRunResult } from '@cucumber/cucumber/api';
 import { cliOptions } from './cliOptions';
 import { existsSync } from 'node:fs';
+import { version } from '../package.json';
 
 /**
  * Merge json like params passed from CLI
@@ -66,6 +67,47 @@ function timeout(promise: Promise<void>, time: number, timeoutMsg: string) {
     ]).finally(() => clearTimeout(timer));
 }
 
+function formatConfigValue(value: any): string {
+    if (typeof value === 'function') return '[Function]';
+    if (Array.isArray(value)) return value.map(v => Array.isArray(v) ? v.join(':') : formatConfigValue(v)).join(', ');
+    if (value !== null && typeof value === 'object') {
+        if (Object.getPrototypeOf(value) === Object.prototype) {
+            try { return JSON.stringify(value); } catch { return '[Object]'; }
+        }
+        return `[${value.constructor?.name ?? 'Object'}]`;
+    }
+    return String(value);
+}
+
+function printConfigTable(config: Record<string, any>, testCount: number, profile: string): void {
+    const rows: [string, string][] = [];
+    const DISPLAY_KEYS = new Set(['profile', 'paths', 'require', 'import', 'format', 'defaultTimeout', 'parallel', 'config', 'tags', 'testCases']);
+    for (const [key, value] of Object.entries(config)) {
+        if (!DISPLAY_KEYS.has(key)) continue;
+        if (value === undefined || value === null || typeof value === 'function') continue;
+        const raw = formatConfigValue(value);
+        rows.push([key, raw.length > 80 ? raw.slice(0, 77) + '...' : raw]);
+    }
+    rows.push(['profile', profile]);
+    rows.push(['testCases', String(testCount)]);
+    const kw = Math.max(...rows.map(([k]) => k.length));
+    const vw = Math.max(...rows.map(([, v]) => v.length));
+    const dim = '\x1b[2m', bold = '\x1b[1m', cyan = '\x1b[36m', reset = '\x1b[0m';
+    const h = '─';
+    const innerWidth = kw + vw + 5;
+    const title = `@qavajs/core (v${version})`;
+    const titlePad = innerWidth - 2 - title.length;
+    const top    = `${dim}┌${h.repeat(innerWidth)}┐${reset}`;
+    const mid    = `${dim}├${h.repeat(kw + 2)}┬${h.repeat(vw + 2)}┤${reset}`;
+    const bottom = `${dim}└${h.repeat(kw + 2)}┴${h.repeat(vw + 2)}┘${reset}`;
+    const col = `${dim}│${reset}`;
+    console.log(top);
+    console.log(`${col} ${bold}${cyan}${title}${reset}${' '.repeat(titlePad)} ${col}`);
+    console.log(mid);
+    for (const [k, v] of rows) console.log(`${col} ${bold}${k.padEnd(kw)}${reset} ${col} ${v.padEnd(vw)} ${col}`);
+    console.log(bottom);
+}
+
 function getConfig(argvConfig?: string) {
     if (argvConfig) return argvConfig;
     if (existsSync('./config.ts')) return 'config.ts';
@@ -109,7 +151,7 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     runConfiguration.support = supportCode;
     await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
     const { plan } = await loadSources(runConfiguration.sources);
-    console.log(`\x1b[34mTest Cases: ${plan.length}\x1b[0m`);
+    printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
     const result: IRunResult = await runCucumber(runConfiguration, environment);
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);

@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.16.0]
+- :rocket: replaced plain version log with a formatted config table printed before test run
+
 ## [2.15.1]
 - :beetle: fixed `deepMerge` overwriting config file options (e.g. `formatOptions`, `worldParameters`) with `undefined` when the corresponding CLI flag is absent
 
