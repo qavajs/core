@@ -27,6 +27,16 @@ describe('importConfig', () => {
       "profile 'missing' is not defined"
     );
   });
+
+  test('loads named profile from ESM named exports (no default export)', async () => {
+    const config = await importConfig('test/fixtures/config-esm-named.mjs', 'one');
+    expect(config).toEqual({ value: 1 });
+  });
+
+  test('returns whole module for default profile when module has no default export', async () => {
+    const config = await importConfig('test/fixtures/config-esm-named.mjs', 'default');
+    expect(config).toMatchObject({ one: { value: 1 } });
+  });
 });
 
 describe('importMemory', () => {
