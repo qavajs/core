@@ -33,9 +33,31 @@ test('exitCode=1 if scenario failed', async () => {
             return supportMock
         })
     };
-    const chalkMock = {blue: vi.fn()};
-    await run(cucumberMock, chalkMock);
+    await run(cucumberMock);
     expect(process.exitCode).to.equal(1);
+});
+
+test('--paths from cli is passed to loadConfiguration', async () => {
+    process.argv.push('--config');
+    process.argv.push('config.ts');
+    process.argv.push('--paths');
+    process.argv.push('some/path/*.feature');
+    vi.mocked(importConfig).mockResolvedValue({
+        service: [],
+        paths: ['config/*.feature']
+    });
+    const loadConfigurationMock = vi.fn().mockReturnValue({
+        runConfiguration: { support: { requireModules: [] } }
+    });
+    const cucumberMock = {
+        runCucumber: vi.fn().mockReturnValue({ success: true }),
+        loadConfiguration: loadConfigurationMock,
+        loadSources: vi.fn().mockReturnValue({ plan: [] }),
+        loadSupport: vi.fn().mockReturnValue(supportMock)
+    };
+    await run(cucumberMock);
+    const [options] = loadConfigurationMock.mock.calls[0];
+    expect(options.provided.paths).toEqual(['config/*.feature', 'some/path/*.feature']);
 });
 
 test('formatOptions from config is passed to loadConfiguration', async () => {
@@ -78,6 +100,6 @@ test('exitCode=0 if passed --no-error-exit', async () => {
         })
     };
     const chalkMock = {blue: vi.fn()};
-    await run(cucumberMock, chalkMock);
+    await run(cucumberMock);
     expect(process.exitCode).to.equal(0);
 });

@@ -10,7 +10,7 @@ vi.mock('@cucumber/cucumber', () => ({
 
 describe('executionHooks', () => {
   test('registers hooks only for coordinator process', async () => {
-    const hooks = await import('../src/executionHooks');
+    const hooks = await import('../src/executionHooks.js');
     const beforeFn = vi.fn();
     const afterFn = vi.fn();
 
@@ -25,12 +25,24 @@ describe('executionHooks', () => {
   });
 
   test('does not register hooks for worker process', async () => {
-    const hooks = await import('../src/executionHooks');
+    const hooks = await import('../src/executionHooks.js');
     const beforeFn = vi.fn();
 
     process.env.QAVAJS_COORDINATOR = '0';
     hooks.BeforeExecution(beforeFn as any);
 
     expect((beforeFn as any).isTestExecutionHook).toBeUndefined();
+  });
+
+  test('AfterExecution does not register hook for worker process', async () => {
+    const hooks = await import('../src/executionHooks.js');
+    const afterFn = vi.fn();
+
+    process.env.QAVAJS_COORDINATOR = '0';
+    afterAllSpy.mockClear();
+    hooks.AfterExecution(afterFn as any);
+
+    expect((afterFn as any).isTestExecutionHook).toBeUndefined();
+    expect(afterAllSpy).not.toHaveBeenCalled();
   });
 });

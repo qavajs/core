@@ -37,4 +37,14 @@ describe('Fixture', () => {
   test('throws when fixture name is empty', () => {
     expect(() => Fixture({ name: '' }, vi.fn() as any)).toThrow('Fixture name is required');
   });
+
+  test('skips teardown when setup was never called', async () => {
+    const teardown = vi.fn();
+    Fixture({ name: 'no-setup' }, vi.fn().mockResolvedValue(teardown) as any);
+
+    const afterHandler = afterSpy.mock.calls[afterSpy.mock.calls.length - 1][1];
+    const world: any = {};
+    await afterHandler.call(world);
+    expect(teardown).not.toHaveBeenCalled();
+  });
 });

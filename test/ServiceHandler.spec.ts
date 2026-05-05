@@ -1,4 +1,5 @@
 import { describe, expect, test, vi } from 'vitest';
+import { resolve } from 'node:path';
 import ServiceHandler from '../src/ServiceHandler';
 
 describe('ServiceHandler', () => {
@@ -24,6 +25,21 @@ describe('ServiceHandler', () => {
 
   test('handles missing service list', async () => {
     const handler = new ServiceHandler({} as any);
+    await expect(handler.before()).resolves.toBeUndefined();
+    await expect(handler.after({ success: true } as any)).resolves.toBeUndefined();
+  });
+
+  test('loads service from string path', async () => {
+    const servicePath = resolve('./test/fixtures/service-fixture.mjs');
+    const handler = new ServiceHandler({ service: [servicePath] } as any);
+    await expect(handler.before()).resolves.toBeUndefined();
+    await expect(handler.after({ success: true } as any)).resolves.toBeUndefined();
+  });
+
+  test('loads service from [path, options] tuple', async () => {
+    const servicePath = resolve('./test/fixtures/service-fixture.mjs');
+    const options = { timeout: 5000 };
+    const handler = new ServiceHandler({ service: [[servicePath, options]] } as any);
     await expect(handler.before()).resolves.toBeUndefined();
     await expect(handler.after({ success: true } as any)).resolves.toBeUndefined();
   });
