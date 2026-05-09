@@ -33,7 +33,7 @@ export async function executeStep(this: any, text: string, extraParam?: DataTabl
   const stepDefsLibrary = supportCodeLibraryBuilder.buildStepDefinitions();
   const steps = stepDefsLibrary.stepDefinitions.filter(s => s.matchesStepName(text));
   if (steps.length === 0) throw new Error(`Step '${text}' is not defined`);
-  if (steps.length > 1) throw new Error(`'${text}' matches multiple step definitions`);
+  if (steps.length > 1) throw new Error(`Step '${text}' matches multiple step definitions`);
   const step = steps.pop() as any;
   const { parameters } = await step.getInvocationParameters({ step: { text }, world: this } as any);
   try {
@@ -42,14 +42,6 @@ export async function executeStep(this: any, text: string, extraParam?: DataTabl
     err.message = `${text}\n${err.message}`;
     throw err;
   }
-}
-
-function setValue(this: IQavajsWorld, key: string, value: any): void {
-  this.memory.setValue(key, value);
-}
-
-function getValue(this: IQavajsWorld, expression: string): any {
-  return this.memory.getValue(expression);
 }
 
 export class MemoryValue {
@@ -121,8 +113,8 @@ Before({name: 'qavajs init'}, async function (this: IQavajsWorld, scenario) {
   this.memory = memory;
   this.executeStep = executeStep;
   this.executeTest = executeTest;
-  this.getValue = getValue;
-  this.setValue = setValue;
+  this.getValue = (expression: string) => memory.getValue(expression);
+  this.setValue = (key: string, value: any) => memory.setValue(key, value);
   this.validation = function (type: string) {
     const validation = getValidation(type) as Validation;
     validation.poll = getPollValidation(type);
