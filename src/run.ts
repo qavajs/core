@@ -154,7 +154,7 @@ export async function run({ runCucumber, loadConfiguration, loadSources, loadSup
     printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
     const result: IRunResult = plan.length > 0 ? await runCucumber(runConfiguration, environment) : { success: true, support: supportCode };
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
-    await timeout(serviceHandler.after({ success: false, support: supportCode }), serviceTimeout, timeoutMessage);
+    await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }
