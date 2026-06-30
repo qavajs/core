@@ -152,9 +152,16 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
     const { plan } = await loadSources(runConfiguration.sources);
     printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
+    const teardown = async () => {
+        await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
+        await timeout(serviceHandler.after({ success: false, support: supportCode }), serviceTimeout, timeoutMessage);
+    }
+    if (plan.length === 0) {
+        await teardown();
+        process.exit(0);
+    }
     const result: IRunResult = await runCucumber(runConfiguration, environment);
-    await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
-    await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
+    await teardown();
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }

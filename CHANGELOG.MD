@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.16.1]
+- :beetle: fixed teardown (after-execution hooks and service handler) not being called when no test cases match the filter
+
 ## [2.16.0]
 - :rocket: replaced plain version log with a formatted config table printed before test run
 
