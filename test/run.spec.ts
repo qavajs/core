@@ -27,7 +27,7 @@ test('exitCode=1 if scenario failed', async () => {
             return {runConfiguration: {support: {requireModules: []}}}
         }),
         loadSources: vi.fn(() => {
-            return {plan: []}
+            return {plan: [{}]}
         }),
         loadSupport: vi.fn(() => {
             return supportMock
