@@ -97,8 +97,8 @@ function printConfigTable(config: Record<string, any>, testCount: number, profil
     const title = `@qavajs/core (v${version})`;
     const innerWidth = Math.max(kw + vw + 5, title.length + 2);
     const titlePad = innerWidth - 2 - title.length;
-    const top    = `${dim}┌${h.repeat(innerWidth)}┐${reset}`;
-    const mid    = `${dim}├${h.repeat(kw + 2)}┬${h.repeat(vw + 2)}┤${reset}`;
+    const top = `${dim}┌${h.repeat(innerWidth)}┐${reset}`;
+    const mid = `${dim}├${h.repeat(kw + 2)}┬${h.repeat(vw + 2)}┤${reset}`;
     const bottom = `${dim}└${h.repeat(kw + 2)}┴${h.repeat(vw + 2)}┘${reset}`;
     const col = `${dim}│${reset}`;
     console.log(top);
@@ -115,7 +115,7 @@ function getConfig(argvConfig?: string) {
     throw new Error('No config provided');
 }
 
-export async function run({runCucumber, loadConfiguration, loadSources, loadSupport}: any): Promise<void> {
+export async function run({ runCucumber, loadConfiguration, loadSources, loadSupport }: any): Promise<void> {
     const argv: any = cliOptions(process.argv);
     process.env.CONFIG = getConfig(argv.config);
     process.env.PROFILE = argv.profile ?? 'default';
@@ -152,16 +152,9 @@ export async function run({runCucumber, loadConfiguration, loadSources, loadSupp
     await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
     const { plan } = await loadSources(runConfiguration.sources);
     printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
-    const teardown = async () => {
-        await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
-        await timeout(serviceHandler.after({ success: false, support: supportCode }), serviceTimeout, timeoutMessage);
-    }
-    if (plan.length === 0) {
-        await teardown();
-        process.exit(0);
-    }
-    const result: IRunResult = await runCucumber(runConfiguration, environment);
-    await teardown();
+    const result: IRunResult = plan.length > 0 ? await runCucumber(runConfiguration, environment) : { success: true, support: supportCode };
+    await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
+    await timeout(serviceHandler.after({ success: false, support: supportCode }), serviceTimeout, timeoutMessage);
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }
