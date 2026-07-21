@@ -10,7 +10,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
-## [3.0.0]
+## [2.17.0]
 - :pencil: replaced `ts-node` with `tsx` for TypeScript config loading
 - :pencil: updated to TypeScript 7
 - :x: removed deprecated `service` and `serviceTimeout` config options
