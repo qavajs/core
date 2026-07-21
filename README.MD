@@ -4,7 +4,7 @@
 
 `@qavajs/core` is the core test runner module of the [qavajs](https://github.com/qavajs) automation framework.
 It extends [CucumberJS](https://github.com/cucumber/cucumber-js) with memory management, validation utilities,
-fixtures, templates, services, and test composition — all with full ESM, CJS, and TypeScript support.
+fixtures, templates, and test composition — all with full ESM, CJS, and TypeScript support.
 
 **Requirements**: Node.js >= 20
 
@@ -26,7 +26,6 @@ fixtures, templates, services, and test composition — all with full ESM, CJS, 
 - [Fixture](#fixture)
 - [Template](#template)
 - [Test Execution Hooks](#test-execution-hooks)
-- [Service](#service)
 - [Override Memory Values via CLI](#override-memory-values-via-cli)
 - [Pass CLI Params to Workers](#pass-cli-params-to-workers)
 
@@ -100,8 +99,6 @@ export default {
 |------------------|----------|------------|------------------------------------------------------|
 | `memory`         | object   | `{}`       | Memory instance for storing/retrieving test values   |
 | `defaultTimeout` | number   | `10_000`   | Default step timeout in milliseconds                 |
-| ~~`service`~~    | array    | `[]`       | **Deprecated.** Use `BeforeExecution`/`AfterExecution` instead |
-| ~~`serviceTimeout`~~ | number | `60_000` | **Deprecated.** Use `BeforeExecution`/`AfterExecution` instead |
 
 All standard [CucumberJS configuration options](https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md) are also supported.
 
@@ -302,46 +299,6 @@ BeforeExecution(async function() {
 AfterExecution(async function() {
     await server.stop();
 });
-```
-
----
-
-## Service
-
-> **Deprecated** — `service` and `serviceTimeout` are deprecated and will be removed in a future version.
-> Use [`BeforeExecution`/`AfterExecution` hooks](#test-execution-hooks) instead.
-
-Services provide `before`/`after` lifecycle hooks for the full test run. They have access to a typed
-`options` context and receive the run result in `after`.
-
-```typescript
-import externalService from './externalService';
-
-export default {
-    service: [
-        {
-            options: { baseUrl: 'https://api.example.com' },
-            async before() {
-                console.log('Starting with', this.options.baseUrl);
-            },
-            async after(result) {
-                if (!result.success) process.exitCode = 1;
-            }
-        },
-        {
-            options: { data: 42 },
-            ...externalService
-        }
-    ]
-}
-```
-
-Services have a **default timeout of 60 seconds**. Override it with `serviceTimeout` (in milliseconds):
-
-```typescript
-export default {
-    serviceTimeout: 120_000  // 2 minutes
-}
 ```
 
 ---

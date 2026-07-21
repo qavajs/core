@@ -10,6 +10,11 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.17.0]
+- :pencil: replaced `ts-node` with `tsx` for TypeScript config loading
+- :pencil: updated to TypeScript 7
+- :x: removed deprecated `service` and `serviceTimeout` config options
+
 ## [2.16.1]
 - :beetle: fixed teardown (after-execution hooks and service handler) not being called when no test cases match the filter
 
