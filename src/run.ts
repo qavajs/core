@@ -1,4 +1,3 @@
-import ServiceHandler from './ServiceHandler';
 import { resolve } from 'node:path';
 import { importConfig } from './importConfig';
 import { IRunResult } from '@cucumber/cucumber/api';
@@ -51,20 +50,6 @@ function deepMerge(target: any, ...sources: any[]) {
     }
 
     return deepMerge(target, ...sources);
-}
-
-/**
- * Timeout promise
- * @param promise - promise to wait
- * @param time - timeout
- * @param timeoutMsg - timeout message
- */
-function timeout(promise: Promise<void>, time: number, timeoutMsg: string) {
-    let timer: NodeJS.Timeout;
-    return Promise.race([
-        promise,
-        new Promise((_, reject) => timer = setTimeout(() => reject(new Error(timeoutMsg)), time))
-    ]).finally(() => clearTimeout(timer));
 }
 
 function formatConfigValue(value: any): string {
@@ -122,11 +107,7 @@ export async function run({ runCucumber, loadConfiguration, loadSources, loadSup
     process.env.MEMORY_VALUES = argv.memoryValues ?? '{}';
     process.env.CLI_ARGV = process.argv.join(' ');
     const config = await importConfig(process.env.CONFIG as string, process.env.PROFILE as string);
-    const serviceHandler = new ServiceHandler(config);
-    const serviceTimeout = config.serviceTimeout ?? 60_000
-    const timeoutMessage = `Service timeout '${serviceTimeout}' ms exceeded`;
     process.env.DEFAULT_TIMEOUT = String(config.defaultTimeout ?? 10_000);
-    await timeout(serviceHandler.before(), serviceTimeout, timeoutMessage);
     const memoryLoadHook = resolve(__dirname, './load.js');
     if (argv.formatOptions) argv.formatOptions = mergeJSONParams(argv.formatOptions);
     if (argv.worldParameters) argv.worldParameters = mergeJSONParams(argv.worldParameters);
@@ -154,7 +135,6 @@ export async function run({ runCucumber, loadConfiguration, loadSources, loadSup
     printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
     const result: IRunResult = plan.length > 0 ? await runCucumber(runConfiguration, environment) : { success: true, support: supportCode };
     await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
-    await timeout(serviceHandler.after(result), serviceTimeout, timeoutMessage);
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }
