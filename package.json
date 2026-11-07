@@ -1,9 +1,9 @@
 {
   "name": "@qavajs/core",
-  "version": "2.17.0",
+  "version": "2.18.0",
   "description": "qavajs framework core",
   "scripts": {
-    "build": "tsc",
+    "build": "node -e \"require('node:fs').rmSync('lib',{recursive:true,force:true})\" && tsc",
     "test": "vitest --coverage run",
     "test:e2e:esm": "node bin/qavajs.js run --config test-e2e/esm/config.js --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e:cjs": "node bin/qavajs.js run --config test-e2e/cjs/config.js --qavaBoolean --qavaValue 42 --tags @one --tags @two",
@@ -14,6 +14,7 @@
     "test:e2e:cjs:string:memory": "node bin/qavajs.js run --config test-e2e/cjs/config.js --profile stringMemory --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e:esm:string:memory": "node bin/qavajs.js run --config test-e2e/esm/config.js --profile stringMemory --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e:ts:string:memory": "node bin/qavajs.js run --config test-e2e/ts/config.ts --profile stringMemory --qavaBoolean --qavaValue 42 --tags @one --tags @two",
+    "debug:ui": "npm run build && node bin/qavajs.js ui --config test-e2e/esm/config.js --qavaBoolean --qavaValue 42 --tags @one --tags @two",
     "test:e2e": "npm run build && npm run test:e2e:cjs && npm run test:e2e:esm && npm run test:e2e:ts && npm run test:e2e:cjs:default && npm run test:e2e:esm:default && npm run test:e2e:ts:default && npm run test:e2e:esm:string:memory && npm run test:e2e:cjs:string:memory"
   },
   "repository": {
@@ -38,6 +39,16 @@
     "qavajs": "bin/qavajs.js",
     "cucumber-js": "bin/qavajs.js"
   },
+  "files": [
+    "bin",
+    "lib",
+    "ui",
+    "index.js",
+    "index.mjs",
+    "index.d.ts",
+    "utils.js",
+    "utils.d.ts"
+  ],
   "license": "MIT",
   "engines": {
     "node": ">=20"
@@ -45,16 +56,16 @@
   "dependencies": {
     "@qavajs/memory": "^1.11.0",
     "@qavajs/validation": "^1.6.3",
-    "tsx": "^4.23.1"
+    "tsx": "^4.23.15"
   },
   "devDependencies": {
-    "@cucumber/cucumber": "^13.2.0",
+    "@cucumber/cucumber": "^13.3.0",
     "@qavajs/console-formatter": "^1.2.1",
-    "@types/node": "^26.1.1",
-    "@vitest/coverage-v8": "^4.1.10",
-    "@vitest/ui": "^4.1.10",
+    "@types/node": "^26.6.6",
+    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/ui": "^5.1.0",
     "typescript": "^7.0.2",
-    "vitest": "^4.1.10"
+    "vitest": "^5.1.0"
   },
   "keywords": [
     "test",

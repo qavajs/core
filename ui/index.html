@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>qavajs UI</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%232f9e6e'/%3E%3Cpath d='M6 4.5v7l5.5-3.5z' fill='white'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+    <aside class="sidebar">
+        <header class="sidebar-header">
+            <div class="brand">qavajs <span>UI</span></div>
+            <div class="toolbar">
+                <button class="icon-btn" id="btn-run" title="Run all"></button>
+                <button class="icon-btn" id="btn-stop" title="Stop"></button>
+                <button class="icon-btn" id="btn-reload" title="Reload tests"></button>
+            </div>
+        </header>
+        <div class="progress" id="progress"><div class="progress-bar"></div></div>
+        <div class="filters">
+            <input type="search" id="filter" placeholder="Filter: name, file or @tag" autocomplete="off" spellcheck="false">
+            <div class="chips" id="status-filter" role="radiogroup" aria-label="Status filter">
+                <button data-status="all" role="radio">All</button>
+                <button data-status="failed" role="radio">Failed</button>
+                <button data-status="passed" role="radio">Passed</button>
+                <button data-status="skipped" role="radio">Skipped</button>
+                <button data-status="idle" role="radio">Not run</button>
+            </div>
+        </div>
+        <nav class="tree" id="tree" aria-label="Tests"></nav>
+        <footer class="summary" id="summary"></footer>
+    </aside>
+    <div class="splitter" id="splitter" title="Drag to resize"></div>
+    <main class="main">
+        <div class="banner" id="banner" hidden></div>
+        <section class="details" id="details"></section>
+        <div class="tabs" role="tablist">
+            <button role="tab" data-tab="steps">Steps</button>
+            <button role="tab" data-tab="source">Source</button>
+            <button role="tab" data-tab="output">Output <span class="badge" id="output-badge"></span></button>
+        </div>
+        <section class="panel" id="panel"></section>
+    </main>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -138,3 +138,66 @@ test('deep merges nested config formatOptions with CLI formatOptions', async () 
         snippetSyntax: 'async',
     });
 });
+
+test('auto-discovers config.mjs and config.cjs', async () => {
+    vi.mocked(existsSync).mockImplementation(path => path === './config.cjs');
+    vi.mocked(importConfig).mockResolvedValue({});
+    await run(buildCucumberMock());
+    expect(importConfig).toHaveBeenCalledWith('config.cjs', expect.any(String));
+});
+
+test('No config provided error lists looked up files', async () => {
+    vi.mocked(existsSync).mockReturnValue(false);
+    await expect(run(buildCucumberMock())).rejects.toThrow(/config\.ts, config\.js, config\.mjs, config\.cjs.*--config <path>/);
+});
+
+test('parses and merges --format-options and --world-parameters from cli', async () => {
+    process.argv.push(
+        '--config', 'config.ts',
+        '--format-options', '{"a":1}', '--format-options', '{"b":2}',
+        '--world-parameters', '{"x":1}'
+    );
+    vi.mocked(importConfig).mockResolvedValue({ formatOptions: { c: 3 } });
+    const loadConfigurationMock = vi.fn().mockReturnValue({
+        runConfiguration: { support: { requireModules: [] } },
+    });
+    await run(buildCucumberMock({ loadConfiguration: loadConfigurationMock }));
+    const [options] = loadConfigurationMock.mock.calls[0];
+    expect(options.provided.formatOptions).toEqual({ a: 1, b: 2, c: 3 });
+    expect(options.provided.worldParameters).toEqual({ x: 1 });
+});
+
+test.each([
+    ['--world-parameters', '{bad'],
+    ['--format-options', 'nope'],
+    ['--memory-values', '{"a":'],
+])('throws readable error for invalid json in %s', async (flag, value) => {
+    process.argv.push('--config', 'config.ts', flag, value);
+    vi.mocked(importConfig).mockResolvedValue({});
+    await expect(run(buildCucumberMock())).rejects.toThrow(`${flag} must be valid JSON`);
+});
+
+test('--quiet does not print config table', async () => {
+    process.argv.push('--config', 'config.ts', '--quiet');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    await run(buildCucumberMock());
+    expect(log.mock.calls.flat().join('\n')).not.toContain('@qavajs/core');
+    log.mockRestore();
+});
+
+test('config table has no colors when NO_COLOR is set', async () => {
+    process.argv.push('--config', 'config.ts');
+    process.env.NO_COLOR = '1';
+    vi.mocked(importConfig).mockResolvedValue({});
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+        await run(buildCucumberMock());
+        const output = log.mock.calls.flat().join('\n');
+        expect(output).toContain('@qavajs/core');
+        expect(output).not.toContain('\x1b[');
+    } finally {
+        delete process.env.NO_COLOR;
+        log.mockRestore();
+    }
+});

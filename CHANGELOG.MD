@@ -10,6 +10,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.18.0]
+- :rocket: added `qavajs ui` command: interactive browser UI to discover, run, filter and debug test cases
+- :rocket: added `--help`/`-h` and `--version`/`-v` flags
+- :rocket: feature files passed as positional arguments are added to `--paths` (e.g. `qavajs run features/a.feature:12`)
+- :rocket: added `--quiet`/`-q` flag to hide the config table; config table respects `NO_COLOR`/`FORCE_COLOR` and non-TTY output
+- :rocket: `config.mjs` and `config.cjs` are discovered automatically
+- :rocket: warning for options that look like a typo of a known option (e.g. `--tag`)
+- :rocket: readable errors for unknown commands, missing config file, undefined profile (lists available profiles), invalid JSON in `--world-parameters`/`--format-options`/`--memory-values` and invalid `--parallel`/`--retry`
+- :beetle: fixed `Override` removing the last defined step when the overridden pattern does not exist
+- :beetle: fixed `--format-options` and `--world-parameters` from CLI crashing the run; both can now be passed multiple times
+- :beetle: fixed loading config and memory files by absolute path
+- :beetle: fixed broken `Fixture`, `Template`, `BeforeExecution`, `AfterExecution` type imports in `index.d.ts`
+- :beetle: fixed `utils.js` requiring a non-existent module
+- :pencil: npm package no longer includes `coverage`, `src` and stale build output
+
 ## [2.17.0]
 - :pencil: replaced `ts-node` with `tsx` for TypeScript config loading
 - :pencil: updated to TypeScript 7

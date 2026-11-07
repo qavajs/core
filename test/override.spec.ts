@@ -25,6 +25,15 @@ describe('Override', () => {
     expect(defineStep).toHaveBeenCalledWith('I do test', impl);
   });
 
+  test('does not remove other steps when pattern is not defined yet', () => {
+    const impl = vi.fn();
+
+    Override('I do something new', impl);
+
+    expect(stepDefinitionConfigs.find(def => def.pattern === 'I do other')).toBeDefined();
+    expect(defineStep).toHaveBeenCalledWith('I do something new', impl);
+  });
+
   test('throws when stepDefinitionConfigs is not an array', () => {
     const original = (supportCodeLibraryBuilder as any).stepDefinitionConfigs;
     (supportCodeLibraryBuilder as any).stepDefinitionConfigs = null;

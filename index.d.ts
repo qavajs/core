@@ -2,9 +2,9 @@ export * from '@cucumber/cucumber';
 import { DataTable, IWorld, When } from '@cucumber/cucumber';
 import { IConfiguration, IRunResult } from '@cucumber/cucumber/api';
 export const Override: typeof When;
-export { Fixture } from 'src/Fixture';
-export { Template } from 'src/Template';
-export { BeforeExecution, AfterExecution } from 'src/executionHooks.js';
+export { Fixture } from './lib/Fixture';
+export { Template } from './lib/Template';
+export { BeforeExecution, AfterExecution } from './lib/executionHooks';
 
 /**
  * Validation function
