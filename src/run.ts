@@ -4,13 +4,29 @@ import { IRunResult } from '@cucumber/cucumber/api';
 import { cliOptions } from './cliOptions';
 import { existsSync } from 'node:fs';
 import { version } from '../package.json';
+import { UsageError } from './UsageError';
+
+/**
+ * Parse json param passed from CLI
+ * @param flag - flag name used in error message
+ * @param value - raw json
+ */
+function parseJSONParam(flag: string, value: string): any {
+    try {
+        return JSON.parse(value);
+    } catch (err) {
+        throw new UsageError(`--${flag} must be valid JSON: ${(err as Error).message}\n  received: ${value}`);
+    }
+}
 
 /**
  * Merge json like params passed from CLI
- * @param list
+ * @param flag - flag name used in error message
+ * @param list - raw json values
  */
-function mergeJSONParams(list: string[]): Object {
-    return Object.assign({}, ...(list ?? []).map((option: string) => JSON.parse(option)));
+function mergeJSONParams(flag: string, list: string | string[]): Object {
+    const values = Array.isArray(list) ? list : [list];
+    return Object.assign({}, ...values.map(option => parseJSONParam(flag, option)));
 }
 
 /**
@@ -77,7 +93,8 @@ function printConfigTable(config: Record<string, any>, testCount: number, profil
     rows.push(['testCases', String(testCount)]);
     const kw = Math.max(...rows.map(([k]) => k.length));
     const vw = Math.max(...rows.map(([, v]) => v.length));
-    const dim = '\x1b[2m', bold = '\x1b[1m', cyan = '\x1b[36m', reset = '\x1b[0m';
+    const color = useColors();
+    const [dim, bold, cyan, reset] = color ? ['\x1b[2m', '\x1b[1m', '\x1b[36m', '\x1b[0m'] : ['', '', '', ''];
     const h = '─';
     const title = `@qavajs/core (v${version})`;
     const innerWidth = Math.max(kw + vw + 5, title.length + 2);
@@ -93,24 +110,54 @@ function printConfigTable(config: Record<string, any>, testCount: number, profil
     console.log(bottom);
 }
 
-function getConfig(argvConfig?: string) {
-    if (argvConfig) return argvConfig;
-    if (existsSync('./config.ts')) return 'config.ts';
-    if (existsSync('./config.js')) return 'config.js';
-    throw new Error('No config provided');
+/**
+ * Colors are disabled when output is not a terminal or NO_COLOR is set, FORCE_COLOR enables them
+ */
+function useColors(): boolean {
+    if (process.env.FORCE_COLOR && process.env.FORCE_COLOR !== '0') return true;
+    if (process.env.NO_COLOR) return false;
+    return Boolean(process.stdout.isTTY);
 }
 
-export async function run({ runCucumber, loadConfiguration, loadSources, loadSupport }: any): Promise<void> {
+export const DEFAULT_CONFIGS = ['config.ts', 'config.js', 'config.mjs', 'config.cjs'];
+
+function getConfig(argvConfig?: string) {
+    if (argvConfig) return argvConfig;
+    const defaultConfig = DEFAULT_CONFIGS.find(config => existsSync(`./${config}`));
+    if (defaultConfig) return defaultConfig;
+    throw new UsageError(
+        `No config provided: none of ${DEFAULT_CONFIGS.join(', ')} found in ${process.cwd()}. ` +
+        `Pass a config file with --config <path>`
+    );
+}
+
+/**
+ * Options that take precedence over both config file and CLI values (used by ui mode workers)
+ */
+export interface RunOverrides {
+    /** replaces resolved feature paths */
+    paths?: string[];
+    /** replaces resolved formatters */
+    format?: Array<string | string[]>;
+    dryRun?: boolean;
+    parallel?: number;
+    /** do not call BeforeExecution/AfterExecution hooks */
+    skipExecutionHooks?: boolean;
+}
+
+export async function run({ runCucumber, loadConfiguration, loadSources, loadSupport }: any, overrides: RunOverrides = {}): Promise<void> {
+    const { skipExecutionHooks, ...providedOverrides } = overrides;
     const argv: any = cliOptions(process.argv);
     process.env.CONFIG = getConfig(argv.config);
     process.env.PROFILE = argv.profile ?? 'default';
+    if (argv.memoryValues) parseJSONParam('memory-values', argv.memoryValues);
     process.env.MEMORY_VALUES = argv.memoryValues ?? '{}';
     process.env.CLI_ARGV = process.argv.join(' ');
     const config = await importConfig(process.env.CONFIG as string, process.env.PROFILE as string);
     process.env.DEFAULT_TIMEOUT = String(config.defaultTimeout ?? 10_000);
     const memoryLoadHook = resolve(__dirname, './load.js');
-    if (argv.formatOptions) argv.formatOptions = mergeJSONParams(argv.formatOptions);
-    if (argv.worldParameters) argv.worldParameters = mergeJSONParams(argv.worldParameters);
+    if (argv.formatOptions) argv.formatOptions = mergeJSONParams('format-options', argv.formatOptions);
+    if (argv.worldParameters) argv.worldParameters = mergeJSONParams('world-parameters', argv.worldParameters);
     if (argv.tags instanceof Array) argv.tags = argv.tags.length > 0 ? mergeTags(argv.tags) : undefined;
     const environment = {
         cwd: process.cwd(),
@@ -122,6 +169,9 @@ export async function run({ runCucumber, loadConfiguration, loadSources, loadSup
         provided: deepMerge(config, argv),
         profiles: [process.env.PROFILE as string]
     }
+    for (const [key, value] of Object.entries(providedOverrides)) {
+        if (value !== undefined) options.provided[key] = value;
+    }
     const { runConfiguration } = await loadConfiguration(options, environment);
     runConfiguration.support.requireModules = [memoryLoadHook, ...runConfiguration.support.requireModules];
     const {
@@ -130,11 +180,11 @@ export async function run({ runCucumber, loadConfiguration, loadSources, loadSup
         afterExecutionHooks
     } = await prepareSupportCode(loadSupport, runConfiguration);
     runConfiguration.support = supportCode;
-    await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
+    if (!skipExecutionHooks) await Promise.all(beforeExecutionHooks.map((hook: any) => hook.code()));
     const { plan } = await loadSources(runConfiguration.sources);
-    printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
+    if (!argv.quiet) printConfigTable(options.provided, plan.length, process.env.PROFILE as string);
     const result: IRunResult = plan.length > 0 ? await runCucumber(runConfiguration, environment) : { success: true, support: supportCode };
-    await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
+    if (!skipExecutionHooks) await Promise.all(afterExecutionHooks.map((hook: any) => hook.code()));
     for (const formatPath in runConfiguration?.formats?.files ?? {}) {
         console.log(`${runConfiguration.formats.files[formatPath]} file://${resolve(process.cwd(), formatPath)}`);
     }

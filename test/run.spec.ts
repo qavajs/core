@@ -103,3 +103,37 @@ test('exitCode=0 if passed --no-error-exit', async () => {
     await run(cucumberMock);
     expect(process.exitCode).to.equal(0);
 });
+
+test('overrides replace merged options and can skip execution hooks', async () => {
+    process.argv.push('--config', 'config.ts', '--paths', 'cli/*.feature');
+    vi.mocked(importConfig).mockResolvedValue({
+        paths: ['config/*.feature'],
+        format: ['progress'],
+    });
+    const hook = Object.assign(vi.fn(), { isTestExecutionHook: true });
+    const loadConfigurationMock = vi.fn().mockReturnValue({
+        runConfiguration: { support: { requireModules: [] } }
+    });
+    const cucumberMock = {
+        runCucumber: vi.fn().mockReturnValue({ success: true }),
+        loadConfiguration: loadConfigurationMock,
+        loadSources: vi.fn().mockReturnValue({ plan: [{}] }),
+        loadSupport: vi.fn().mockReturnValue({
+            beforeTestRunHookDefinitions: [{ code: hook }],
+            afterTestRunHookDefinitions: [{ code: hook }],
+        })
+    };
+    await run(cucumberMock, {
+        paths: ['a.feature:3'],
+        format: [['file:///ui/formatter.js']],
+        dryRun: true,
+        parallel: undefined,
+        skipExecutionHooks: true
+    });
+    const [options] = loadConfigurationMock.mock.calls[0];
+    expect(options.provided.paths).toEqual(['a.feature:3']);
+    expect(options.provided.format).toEqual([['file:///ui/formatter.js']]);
+    expect(options.provided.dryRun).toBe(true);
+    expect(options.provided).not.toHaveProperty('skipExecutionHooks');
+    expect(hook).not.toHaveBeenCalled();
+});

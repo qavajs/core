@@ -15,6 +15,7 @@ fixtures, templates, and test composition — all with full ESM, CJS, and TypeSc
 - [Installation](#installation)
 - [Running Tests](#running-tests)
   - [CLI Options](#cli-options)
+- [UI Mode](#ui-mode)
 - [Configuration](#configuration)
 - [World Extensions](#world-extensions)
 - [Memory Value Parameter Type](#memory-value-parameter-type)
@@ -51,6 +52,15 @@ npx qavajs run --config <config> --profile <profile>
 npx cucumber-js run --config <config>
 ```
 
+If `--config` is omitted, `config.ts`, `config.js`, `config.mjs` or `config.cjs` from the current directory is used.
+Feature files can be passed as positional arguments (with optional line numbers):
+
+```bash
+npx qavajs run features/login.feature:12 features/cart.feature
+```
+
+Run `npx qavajs --help` to see all options and `npx qavajs --version` to print the version.
+
 ### CLI Options
 
 | Flag | Type | Description |
@@ -78,6 +88,41 @@ npx cucumber-js run --config <config>
 | `--world-parameters` | string | JSON parameters passed to World |
 | `--memory-values` | string | JSON values to override in memory |
 | `--no-error-exit` | boolean | Suppress non-zero exit code on test failure |
+| `--quiet`, `-q` | boolean | Do not print the config table |
+| `--help`, `-h` | boolean | Show help |
+| `--version`, `-v` | boolean | Show version |
+
+`--format-options` and `--world-parameters` can be passed multiple times; the JSON objects are merged.
+Unknown options are not rejected (they can be read by your code via `CLI_ARGV`), but options that look like a typo of a known one (e.g. `--tag`) produce a warning.
+The config table is printed without colors when output is not a terminal or `NO_COLOR` is set (`FORCE_COLOR` overrides this).
+
+---
+
+## UI Mode
+
+UI mode opens an interactive test runner in the browser (similar to Playwright UI mode or the Cypress runner):
+
+```bash
+npx qavajs ui --config <config> --profile <profile>
+```
+
+- browse features, rules, scenario outlines and examples as a tree with live status
+- run all tests, a feature, a rule, an outline or a single scenario; stop a run at any time
+- filter by name, file or `@tag`, and by status (failed, passed, skipped, not run)
+- inspect steps with durations, errors, data tables, doc strings and attachments (logs, images, video, json)
+- view the feature source with step results, and the full console output of the run
+- reload the test tree after changing features or step definitions
+
+Every run is executed in a separate process with the same config, profile and CLI options (`--tags`, `--world-parameters`, `--memory-values`, etc.),
+so `BeforeExecution`/`AfterExecution` hooks are called once per run. Formatters from the config are not used in UI mode.
+
+| Flag        | Default     | Description                                  |
+|-------------|-------------|----------------------------------------------|
+| `--port`    | random      | Port of the UI server                        |
+| `--host`    | `localhost` | Host to bind the UI server to                |
+| `--no-open` |             | Do not open the browser automatically        |
+
+Keyboard shortcuts: `F5` / `Ctrl+Enter` run visible tests, `Esc` stops the run, `/` focuses the filter, arrow keys navigate the tree, `Enter` runs the focused item.
 
 ---
 

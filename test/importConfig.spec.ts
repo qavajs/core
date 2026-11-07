@@ -28,6 +28,29 @@ describe('importConfig', () => {
     );
   });
 
+  test('lists available profiles for missing profile', async () => {
+    await expect(importConfig('test/fixtures/config-with-profiles.mjs', 'missing')).rejects.toThrow(
+      /Available profiles: .*one/
+    );
+  });
+
+  test('does not list options of a plain config as profiles', async () => {
+    await expect(importConfig('test/fixtures/config-plain.js', 'missing')).rejects.toThrow(
+      /is not defined in 'test\/fixtures\/config-plain.js'$/
+    );
+  });
+
+  test('throws readable error for missing config file', async () => {
+    await expect(importConfig('test/fixtures/nope.js', 'default')).rejects.toThrow(
+      "file 'test/fixtures/nope.js' not found"
+    );
+  });
+
+  test('loads config by absolute path', async () => {
+    const config = await importConfig(process.cwd() + '/test/fixtures/config-plain.js', 'default');
+    expect(config).toEqual({ value: 'plain-config' });
+  });
+
   test('loads named profile from ESM named exports (no default export)', async () => {
     const config = await importConfig('test/fixtures/config-esm-named.mjs', 'one');
     expect(config).toEqual({ value: 1 });
