@@ -10,6 +10,9 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.18.1]
+- :beetle: restored `src` folder in npm package (required by vscode extension)
+
 ## [2.18.0]
 - :rocket: added `qavajs ui` command: interactive browser UI to discover, run, filter and debug test cases
 - :rocket: added `--help`/`-h` and `--version`/`-v` flags
