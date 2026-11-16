@@ -147,6 +147,20 @@ export default {
 
 All standard [CucumberJS configuration options](https://github.com/cucumber/cucumber-js/blob/main/docs/configuration.md) are also supported.
 
+### Combining config and CLI options
+
+CLI options are merged into the selected config profile the same way CucumberJS merges them:
+
+| Option | Result |
+|--------|--------|
+| `paths` | CLI value **replaces** config value (e.g. `qavajs run features/login.feature:12` runs only that scenario) |
+| `format`, `import`, `require`, `requireModule`, `name` | CLI values are **appended** to config values |
+| `tags`, `retryTagFilter` | combined with `and`: `(config tags) and (cli tags)` |
+| `formatOptions`, `worldParameters` | objects are merged, CLI keys win |
+| any other option | CLI value replaces config value |
+
+The config object itself is never modified, and class instances (such as `memory: new Memory()`) are passed through unchanged.
+
 ---
 
 ## World Extensions
@@ -284,7 +298,7 @@ Override('I do test', async function() {
 
 ## Fixture
 
-`Fixture` prepares the test environment for scenarios with a specific tag. An optional return value is treated as a teardown function executed after the scenario.
+`Fixture` prepares the test environment for scenarios with a specific tag. The setup function may return a teardown function, which is executed after the scenario.
 
 ```typescript
 import { Fixture } from '@qavajs/core';
@@ -308,6 +322,10 @@ Feature: Product page
     And  I click 'cart icon'
     Then I expect 'qavajs T-shirt cart item' to be visible
 ```
+
+- If setup throws, the error names the fixture (`Fixture 'pdp' setup failed, teardown will not run: ...`). No teardown is registered in that case, so setup should release anything it acquired before failing.
+- Setup must return a function or nothing; any other return value fails the scenario.
+- Teardown errors are reported as `Fixture '<name>' teardown failed: ...`.
 
 ---
 
@@ -345,6 +363,10 @@ AfterExecution(async function() {
     await server.stop();
 });
 ```
+
+- `BeforeExecution` hooks run one at a time in registration order; if one fails, the remaining ones and the tests are skipped.
+- `AfterExecution` hooks run one at a time in reverse registration order (like `AfterAll`), so resources are released in the opposite order they were acquired.
+- `AfterExecution` hooks always run — also when a `BeforeExecution` hook or the test run itself crashed. Every hook is called even if a previous one failed.
 
 ---
 

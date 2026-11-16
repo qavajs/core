@@ -2,6 +2,8 @@ import { spawn } from 'node:child_process';
 import { AddressInfo } from 'node:net';
 import { UiSession } from './session';
 import { createUiServer } from './server';
+import { UsageError } from '../UsageError';
+import { painter } from '../colors';
 
 export interface UiOptions {
     host: string;
@@ -20,17 +22,31 @@ export function parseUiArgs(argv: string[]): UiOptions {
     if (args[0] === 'ui') args.shift();
     for (let i = 0; i < args.length; i++) {
         const [flag, inlineValue] = args[i].split(/=(.*)/s);
-        const value = () => inlineValue ?? args[++i];
+        const value = () => {
+            if (inlineValue !== undefined) return inlineValue;
+            const next = args[i + 1];
+            if (next === undefined || next.startsWith('-')) throw new UsageError(`${flag} requires a value`);
+            i++;
+            return next;
+        };
         switch (flag) {
-            case '--port': options.port = Number(value()); break;
+            case '--port': options.port = parsePort(value()); break;
             case '--host': options.host = value(); break;
             case '--open': options.open = true; break;
             case '--no-open': options.open = false; break;
             default: options.passthrough.push(args[i]);
         }
     }
-    if (!Number.isInteger(options.port) || options.port < 0) throw new Error('--port must be a non-negative integer');
+    if (options.host.trim() === '') throw new UsageError('--host must not be empty');
     return options;
+}
+
+function parsePort(value: string): number {
+    const port = Number(value);
+    if (value.trim() === '' || !Number.isInteger(port) || port < 0 || port > 65535) {
+        throw new UsageError(`--port must be an integer between 0 and 65535, got '${value}'`);
+    }
+    return port;
 }
 
 function openBrowser(url: string) {
@@ -59,8 +75,9 @@ export async function startUi(argv: string[] = process.argv): Promise<void> {
     });
     const { port } = server.address() as AddressInfo;
     const url = `http://${options.host.includes(':') ? `[${options.host}]` : options.host}:${port}`;
-    console.log(`\x1b[1m\x1b[36mqavajs ui\x1b[0m is running at ${url}`);
-    console.log('\x1b[2mpress Ctrl+C to exit\x1b[0m');
+    const paint = painter(process.stdout);
+    console.log(`${paint('qavajs ui', 'bold', 'cyan')} is running at ${url}`);
+    console.log(paint('press Ctrl+C to exit', 'dim'));
 
     const shutdown = () => {
         session.dispose();

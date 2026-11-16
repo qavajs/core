@@ -80,7 +80,40 @@ export function findTypos(argv: string[]): Array<{ flag: string, suggestion: str
     return typos;
 }
 
-export function cliOptions(argv: string[]) {
+/**
+ * Parsed CLI options. Unknown flags are kept as is (custom params read by user code)
+ */
+export interface CliOptions {
+    config?: string;
+    profile?: string;
+    paths?: string[];
+    backtrace?: boolean;
+    dryRun?: boolean;
+    forceExit?: boolean;
+    failFast?: boolean;
+    format?: string[];
+    formatOptions?: string[];
+    import?: string[];
+    name?: string[];
+    order?: string;
+    parallel?: number;
+    require?: string[];
+    requireModule?: string[];
+    retry?: number;
+    retryTagFilter?: string[];
+    strict?: boolean;
+    tags?: string[];
+    worldParameters?: string[];
+    memoryValues?: string;
+    shard?: string;
+    errorExit?: boolean;
+    quiet?: boolean;
+    help?: boolean;
+    version?: boolean;
+    [flag: string]: unknown;
+}
+
+export function cliOptions(argv: string[]): CliOptions {
     const { values, positionals } = parseArgs({
         args: argv.slice(2),
         options: OPTIONS,
@@ -88,7 +121,8 @@ export function cliOptions(argv: string[]) {
         allowPositionals: true,
     });
 
-    const result: any = {
+    // strict: false keeps unknown flags, so parseArgs can't narrow value types
+    const result = {
         ...values,
         dryRun: values['dry-run'],
         forceExit: values['force-exit'] || values['exit'],
@@ -98,7 +132,7 @@ export function cliOptions(argv: string[]) {
         retryTagFilter: values['retry-tag-filter'],
         worldParameters: values['world-parameters'],
         memoryValues: values['memory-values'],
-    };
+    } as CliOptions;
     result.parallel = toNonNegativeInt('parallel', values.parallel as string | undefined);
     result.retry = toNonNegativeInt('retry', values.retry as string | undefined);
     if (values['no-error-exit']) result.errorExit = false;

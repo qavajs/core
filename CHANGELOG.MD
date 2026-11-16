@@ -10,6 +10,18 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [Unreleased]
+- :beetle: `AfterExecution` hooks now run even if a `BeforeExecution` hook or the test run crashes; one failing hook no longer skips the others
+- :beetle: `BeforeExecution` hooks run sequentially in registration order, `AfterExecution` hooks in reverse order (previously all were run concurrently)
+- :beetle: **behavior change:** config and CLI options are merged like CucumberJS does: CLI `--paths` (including positional feature paths) replace config `paths` instead of being appended; config `tags`/`retryTagFilter` are combined with CLI values using `and` instead of being replaced
+- :beetle: config object is no longer mutated by CLI options; class instances in config (e.g. `memory`) keep their prototype
+- :beetle: `Fixture` errors name the fixture; setup returning a non-function value fails clearly; teardown runs at most once
+- :beetle: `qavajs ui`: `--port`/`--host` without a value or with an invalid port are reported as usage errors
+- :beetle: colored output of CLI errors, warnings and `qavajs ui` respects `NO_COLOR`/`FORCE_COLOR` and non-TTY output
+- :rocket: `executeStep` (and `Template`, `executeTest`) reuse built step definitions instead of rebuilding them on every call
+- :pencil: public typings (`IQavajsWorld`, `IQavajsConfig`, `Validation`, `MemoryValue`, `Override`) are generated from source; removed stale `service`/`serviceTimeout` from `IQavajsConfig` typings; `IQavajsWorld` now declares `memory`
+- :pencil: unit tests for CLI entry, ui worker/formatter/server startup, support code (`load.ts`) and soft assertion patch; coverage thresholds are enforced
+
 ## [2.18.1]
 - :beetle: restored `src` folder in npm package (required by vscode extension)
 

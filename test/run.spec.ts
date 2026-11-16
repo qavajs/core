@@ -19,7 +19,7 @@ test('exitCode=1 if scenario failed', async () => {
     process.argv.push('--config')
     process.argv.push('config.ts')
     vi.mocked(importConfig).mockReturnValue(Promise.resolve({
-        service: []
+
     }));
     const cucumberMock = {
         runCucumber: vi.fn().mockReturnValue({ success: false }),
@@ -37,13 +37,13 @@ test('exitCode=1 if scenario failed', async () => {
     expect(process.exitCode).to.equal(1);
 });
 
-test('--paths from cli is passed to loadConfiguration', async () => {
+test('--paths from cli replaces config paths', async () => {
     process.argv.push('--config');
     process.argv.push('config.ts');
     process.argv.push('--paths');
     process.argv.push('some/path/*.feature');
     vi.mocked(importConfig).mockResolvedValue({
-        service: [],
+
         paths: ['config/*.feature']
     });
     const loadConfigurationMock = vi.fn().mockReturnValue({
@@ -57,14 +57,14 @@ test('--paths from cli is passed to loadConfiguration', async () => {
     };
     await run(cucumberMock);
     const [options] = loadConfigurationMock.mock.calls[0];
-    expect(options.provided.paths).toEqual(['config/*.feature', 'some/path/*.feature']);
+    expect(options.provided.paths).toEqual(['some/path/*.feature']);
 });
 
 test('formatOptions from config is passed to loadConfiguration', async () => {
     process.argv.push('--config');
     process.argv.push('config.ts');
     vi.mocked(importConfig).mockResolvedValue({
-        service: [],
+
         formatOptions: { colorsEnabled: true }
     });
     const loadConfigurationMock = vi.fn().mockReturnValue({
@@ -85,7 +85,7 @@ test('exitCode=0 if passed --no-error-exit', async () => {
     process.argv.push('--no-error-exit');
     process.argv.push('--config')
     vi.mocked(importConfig).mockReturnValue(Promise.resolve({
-        service: []
+
     }));
     const cucumberMock = {
         runCucumber: vi.fn().mockReturnValue({ success: false }),

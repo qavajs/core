@@ -47,4 +47,50 @@ describe('Fixture', () => {
     await afterHandler.call(world);
     expect(teardown).not.toHaveBeenCalled();
   });
+
+  function lastHandlers() {
+    return {
+      setup: beforeSpy.mock.calls[beforeSpy.mock.calls.length - 1][1],
+      teardown: afterSpy.mock.calls[afterSpy.mock.calls.length - 1][1],
+    };
+  }
+
+  test('setup without teardown is allowed', async () => {
+    Fixture({ name: 'no-teardown' }, vi.fn().mockResolvedValue(undefined));
+    const { setup, teardown } = lastHandlers();
+    const world: any = {};
+    await setup.call(world);
+    await expect(teardown.call(world)).resolves.toBeUndefined();
+  });
+
+  test('setup error names the fixture', async () => {
+    Fixture({ name: 'db' }, vi.fn().mockRejectedValue(new Error('connection refused')));
+    const { setup } = lastHandlers();
+    await expect(setup.call({})).rejects.toThrow("Fixture 'db' setup failed, teardown will not run: connection refused");
+  });
+
+  test('non error thrown from setup is wrapped', async () => {
+    Fixture({ name: 'str' }, vi.fn().mockRejectedValue('oops'));
+    const { setup } = lastHandlers();
+    await expect(setup.call({})).rejects.toThrow("Fixture 'str' setup failed, teardown will not run: oops");
+  });
+
+  test('setup returning a non function is rejected', async () => {
+    Fixture({ name: 'bad' }, vi.fn().mockResolvedValue({ stop() {} }));
+    const { setup } = lastHandlers();
+    await expect(setup.call({})).rejects.toThrow("Fixture 'bad' setup must return a teardown function or nothing, got object");
+  });
+
+  test('teardown error names the fixture and teardown runs only once', async () => {
+    const teardownFn = vi.fn().mockRejectedValue(new Error('still running'));
+    Fixture({ name: 'server' }, vi.fn().mockResolvedValue(teardownFn));
+    const { setup, teardown } = lastHandlers();
+    const world: any = {};
+    await setup.call(world);
+    await expect(teardown.call(world)).rejects.toThrow("Fixture 'server' teardown failed: still running");
+    await teardown.call(world);
+    expect(teardownFn).toHaveBeenCalledTimes(1);
+    expect(teardownFn.mock.contexts[0]).toBe(world);
+  });
 });
+

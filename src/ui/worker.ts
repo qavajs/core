@@ -11,14 +11,26 @@ function send(message: object): Promise<void> {
     });
 }
 
-process.once('message', async (overrides: RunOverrides) => {
+/**
+ * Execute a run requested by the ui server and report the outcome
+ * @param overrides - run overrides sent by ui server
+ * @param notify - sends result message to ui server
+ */
+export async function handleRun(overrides: RunOverrides, notify: (message: object) => Promise<void> = send): Promise<void> {
     try {
         const cucumber = await import('@cucumber/cucumber/api');
         await run(cucumber, overrides);
-        await send({ type: 'done', success: process.exitCode === 0 });
+        await notify({ type: 'done', success: process.exitCode === 0 });
     } catch (err: any) {
-        await send({ type: 'fatal', message: err?.stack ?? String(err) });
+        await notify({ type: 'fatal', message: err?.stack ?? String(err) });
         process.exitCode = 1;
     }
-    process.disconnect?.();
-});
+}
+
+// only when forked as ui worker process (not when imported)
+if (require.main === module) {
+    process.once('message', async (overrides: RunOverrides) => {
+        await handleRun(overrides);
+        process.disconnect?.();
+    });
+}

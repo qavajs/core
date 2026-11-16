@@ -38,7 +38,7 @@ function buildCucumberMock(overrides: any = {}) {
 
 test('merges multiple --tags with and', async () => {
     process.argv.push('--config', 'config.ts', '--tags', '@smoke', '--tags', '@regression');
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     const loadConfigurationMock = vi.fn().mockReturnValue({
         runConfiguration: { support: { requireModules: [] } },
     });
@@ -49,7 +49,7 @@ test('merges multiple --tags with and', async () => {
 
 test('single --tag is wrapped in parens', async () => {
     process.argv.push('--config', 'config.ts', '--tags', '@smoke');
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     const loadConfigurationMock = vi.fn().mockReturnValue({
         runConfiguration: { support: { requireModules: [] } },
     });
@@ -60,7 +60,7 @@ test('single --tag is wrapped in parens', async () => {
 
 test('formats.files entries are logged to console', async () => {
     process.argv.push('--config', 'config.ts');
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     const loadConfigurationMock = vi.fn().mockReturnValue({
         runConfiguration: {
             support: { requireModules: [] },
@@ -75,7 +75,7 @@ test('formats.files entries are logged to console', async () => {
 
 test('beforeExecutionHooks are called and excluded from support code', async () => {
     process.argv.push('--config', 'config.ts');
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     const beforeHook = vi.fn();
     (beforeHook as any).isTestExecutionHook = true;
     const regularHook = vi.fn();
@@ -90,7 +90,7 @@ test('beforeExecutionHooks are called and excluded from support code', async () 
 
 test('afterExecutionHooks are called and excluded from support code', async () => {
     process.argv.push('--config', 'config.ts');
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     const afterHook = vi.fn();
     (afterHook as any).isTestExecutionHook = true;
     const regularHook = vi.fn();
@@ -103,16 +103,107 @@ test('afterExecutionHooks are called and excluded from support code', async () =
     expect(regularHook).not.toHaveBeenCalled();
 });
 
+function executionHook(fn: () => any) {
+    return { code: Object.assign(vi.fn(fn), { isTestExecutionHook: true }) };
+}
+
+test('BeforeExecution hooks run sequentially in order, AfterExecution in reverse order', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const calls: string[] = [];
+    const tracked = (name: string) => executionHook(async () => {
+        calls.push(`${name}:start`);
+        await new Promise(resolve => setTimeout(resolve, name.endsWith('1') ? 20 : 0));
+        calls.push(`${name}:end`);
+    });
+    const supportMock = {
+        beforeTestRunHookDefinitions: [tracked('before1'), tracked('before2')],
+        afterTestRunHookDefinitions: [tracked('after1'), tracked('after2')],
+    };
+    await run(buildCucumberMock({ loadSupport: vi.fn().mockReturnValue(supportMock) }));
+    expect(calls).toEqual([
+        'before1:start', 'before1:end', 'before2:start', 'before2:end',
+        'after2:start', 'after2:end', 'after1:start', 'after1:end',
+    ]);
+});
+
+test('AfterExecution hooks run when the test run crashes and the original error is rethrown', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const afterHook = executionHook(() => {});
+    const supportMock = {
+        beforeTestRunHookDefinitions: [],
+        afterTestRunHookDefinitions: [afterHook],
+    };
+    const runError = new Error('runCucumber crashed');
+    await expect(run(buildCucumberMock({
+        loadSupport: vi.fn().mockReturnValue(supportMock),
+        loadSources: vi.fn().mockReturnValue({ plan: [{}] }),
+        runCucumber: vi.fn().mockRejectedValue(runError),
+    }))).rejects.toBe(runError);
+    expect(afterHook.code).toHaveBeenCalledTimes(1);
+});
+
+test('failing BeforeExecution hook stops setup, skips the run and still runs teardown', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const setupError = new Error('setup failed');
+    const failingBefore = executionHook(() => { throw setupError; });
+    const nextBefore = executionHook(() => {});
+    const failingAfter = executionHook(() => { throw new Error('teardown failed'); });
+    const afterHook = executionHook(() => {});
+    const supportMock = {
+        beforeTestRunHookDefinitions: [failingBefore, nextBefore],
+        afterTestRunHookDefinitions: [afterHook, failingAfter],
+    };
+    const cucumber = buildCucumberMock({ loadSupport: vi.fn().mockReturnValue(supportMock) });
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await expect(run(cucumber)).rejects.toBe(setupError);
+    expect(nextBefore.code).not.toHaveBeenCalled();
+    expect(cucumber.runCucumber).not.toHaveBeenCalled();
+    expect(afterHook.code).toHaveBeenCalledTimes(1);
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('AfterExecution hook failed'), expect.any(Error));
+    errorSpy.mockRestore();
+});
+
+test('all AfterExecution hooks run even if one fails, and failures are reported', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const teardownError = new Error('teardown failed');
+    const afterHook = executionHook(() => {});
+    const supportMock = {
+        beforeTestRunHookDefinitions: [],
+        afterTestRunHookDefinitions: [afterHook, executionHook(() => { throw teardownError; })],
+    };
+    await expect(run(buildCucumberMock({ loadSupport: vi.fn().mockReturnValue(supportMock) }))).rejects.toBe(teardownError);
+    expect(afterHook.code).toHaveBeenCalledTimes(1);
+});
+
+test('multiple AfterExecution failures are combined into AggregateError', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const supportMock = {
+        beforeTestRunHookDefinitions: [],
+        afterTestRunHookDefinitions: [
+            executionHook(() => { throw new Error('a'); }),
+            executionHook(() => { throw new Error('b'); }),
+        ],
+    };
+    const error = await run(buildCucumberMock({ loadSupport: vi.fn().mockReturnValue(supportMock) })).catch(err => err);
+    expect(error).toBeInstanceOf(AggregateError);
+    expect(error.errors.map((e: Error) => e.message)).toEqual(['b', 'a']);
+});
+
 test('auto-discovers config.ts when no --config provided', async () => {
     vi.mocked(existsSync).mockReturnValueOnce(true);
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     await run(buildCucumberMock());
     expect(importConfig).toHaveBeenCalledWith('config.ts', expect.any(String));
 });
 
 test('auto-discovers config.js when config.ts is not found', async () => {
     vi.mocked(existsSync).mockReturnValueOnce(false).mockReturnValueOnce(true);
-    vi.mocked(importConfig).mockResolvedValue({ service: [] });
+    vi.mocked(importConfig).mockResolvedValue({});
     await run(buildCucumberMock());
     expect(importConfig).toHaveBeenCalledWith('config.js', expect.any(String));
 });
@@ -125,7 +216,7 @@ test('throws No config provided when neither config file exists', async () => {
 test('deep merges nested config formatOptions with CLI formatOptions', async () => {
     process.argv.push('--config', 'config.ts');
     vi.mocked(importConfig).mockResolvedValue({
-        service: [],
+
         formatOptions: { colorsEnabled: true, snippetSyntax: 'async' },
     });
     const loadConfigurationMock = vi.fn().mockReturnValue({
@@ -200,4 +291,31 @@ test('config table has no colors when NO_COLOR is set', async () => {
         delete process.env.NO_COLOR;
         log.mockRestore();
     }
+});
+
+test('config from file is not mutated and memory instance is passed by reference', async () => {
+    process.argv.push('--config', 'config.ts', '--format', 'progress', '--tags', '@smoke');
+    class Memory { get value() { return 'proto'; } }
+    const memory = new Memory();
+    const config = { format: ['json:report.json'], tags: 'not @wip', memory };
+    vi.mocked(importConfig).mockResolvedValue(config);
+    const loadConfigurationMock = vi.fn().mockReturnValue({ runConfiguration: { support: { requireModules: [] } } });
+    vi.spyOn(console, 'log').mockImplementation(() => {});
+    await run(buildCucumberMock({ loadConfiguration: loadConfigurationMock }));
+    const [options] = loadConfigurationMock.mock.calls[0];
+    expect(options.provided.format).toEqual(['json:report.json', 'progress']);
+    expect(options.provided.tags).toBe('(not @wip) and (@smoke)');
+    expect(options.provided.memory).toBe(memory);
+    expect(config).toEqual({ format: ['json:report.json'], tags: 'not @wip', memory });
+});
+
+test('coordinator flag is reset when loading support code fails', async () => {
+    process.argv.push('--config', 'config.ts');
+    vi.mocked(importConfig).mockResolvedValue({});
+    const loadSupport = vi.fn().mockImplementation(async () => {
+        expect(process.env.QAVAJS_COORDINATOR).toBe('1');
+        throw new Error('syntax error in steps');
+    });
+    await expect(run(buildCucumberMock({ loadSupport }))).rejects.toThrow('syntax error in steps');
+    expect(process.env.QAVAJS_COORDINATOR).toBe('0');
 });
