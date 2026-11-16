@@ -10,6 +10,21 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 :pencil: - chore  
 :microscope: - experimental
 
+## [2.19.0]
+- :beetle: `AfterExecution` hooks now run even if a `BeforeExecution` hook or the test run crashes; one failing hook no longer skips the others
+- :beetle: `BeforeExecution` hooks run sequentially in registration order, `AfterExecution` hooks in reverse order (previously all were run concurrently)
+- :beetle: **behavior change:** config and CLI options are merged like CucumberJS does: CLI `--paths` (including positional feature paths) replace config `paths` instead of being appended; config `tags`/`retryTagFilter` are combined with CLI values using `and` instead of being replaced
+- :beetle: config object is no longer mutated by CLI options; class instances in config (e.g. `memory`) keep their prototype
+- :beetle: `Fixture` errors name the fixture; setup returning a non-function value fails clearly; teardown runs at most once
+- :beetle: `qavajs ui`: `--port`/`--host` without a value or with an invalid port are reported as usage errors
+- :beetle: colored output of CLI errors, warnings and `qavajs ui` respects `NO_COLOR`/`FORCE_COLOR` and non-TTY output
+- :rocket: `executeStep` (and `Template`, `executeTest`) reuse built step definitions instead of rebuilding them on every call
+- :rocket: `config.mts` and `config.cts` are supported (and auto-discovered after the existing defaults); `.mts` configs are loaded as ES modules, so top-level `await` works
+- :beetle: options that need a value (`--config`, `--parallel`, `--tags`, ...) report `requires a value` instead of crashing with a TypeError, and no longer take the next option (e.g. `--config -q`) as their value; use `--name=-x` for values starting with `-`
+- :beetle: `@qavajs/core/utils` can be imported (it was blocked by the `exports` map); `exports` now also declares `types`
+- :pencil: public typings (`IQavajsWorld`, `IQavajsConfig`, `Validation`, `MemoryValue`, `Override`) are generated from source; removed stale `service`/`serviceTimeout` from `IQavajsConfig` typings; `IQavajsWorld` now declares `memory`
+- :pencil: unit tests for CLI entry, ui worker/formatter/server startup, support code (`load.ts`) and soft assertion patch; coverage thresholds are enforced
+
 ## [2.18.1]
 - :beetle: restored `src` folder in npm package (required by vscode extension)
 

@@ -80,15 +80,75 @@ export function findTypos(argv: string[]): Array<{ flag: string, suggestion: str
     return typos;
 }
 
-export function cliOptions(argv: string[]) {
-    const { values, positionals } = parseArgs({
+/**
+ * Parsed CLI options. Unknown flags are kept as is (custom params read by user code)
+ */
+export interface CliOptions {
+    config?: string;
+    profile?: string;
+    paths?: string[];
+    backtrace?: boolean;
+    dryRun?: boolean;
+    forceExit?: boolean;
+    failFast?: boolean;
+    format?: string[];
+    formatOptions?: string[];
+    import?: string[];
+    name?: string[];
+    order?: string;
+    parallel?: number;
+    require?: string[];
+    requireModule?: string[];
+    retry?: number;
+    retryTagFilter?: string[];
+    strict?: boolean;
+    tags?: string[];
+    worldParameters?: string[];
+    memoryValues?: string;
+    shard?: string;
+    errorExit?: boolean;
+    quiet?: boolean;
+    help?: boolean;
+    version?: boolean;
+    [flag: string]: unknown;
+}
+
+/** `--flag` or `-f`: a flag, not a value */
+const FLAG_LIKE = /^(--\S+|-[a-zA-Z])$/;
+
+/**
+ * With `strict: false` parseArgs does not report string options without a value:
+ * `--config` at the end becomes `true` and `--config -q` takes `-q` as the value.
+ */
+function assertOptionValues(tokens: NonNullable<ReturnType<typeof parseArgs>['tokens']>) {
+    for (const token of tokens) {
+        if (token.kind !== 'option') continue;
+        const option = OPTIONS[token.name as keyof typeof OPTIONS];
+        if (option?.type !== 'string') continue;
+        if (token.value === undefined || token.value.trim() === '') {
+            throw new UsageError(`${token.rawName} requires a value`);
+        }
+        if (!token.inlineValue && FLAG_LIKE.test(token.value.split('=')[0])) {
+            throw new UsageError(
+                `${token.rawName} requires a value, got option '${token.value}'. ` +
+                `Use ${token.rawName}=<value> if the value starts with '-'`
+            );
+        }
+    }
+}
+
+export function cliOptions(argv: string[]): CliOptions {
+    const { values, positionals, tokens } = parseArgs({
         args: argv.slice(2),
         options: OPTIONS,
         strict: false,
         allowPositionals: true,
+        tokens: true,
     });
+    assertOptionValues(tokens);
 
-    const result: any = {
+    // strict: false keeps unknown flags, so parseArgs can't narrow value types
+    const result = {
         ...values,
         dryRun: values['dry-run'],
         forceExit: values['force-exit'] || values['exit'],
@@ -98,7 +158,7 @@ export function cliOptions(argv: string[]) {
         retryTagFilter: values['retry-tag-filter'],
         worldParameters: values['world-parameters'],
         memoryValues: values['memory-values'],
-    };
+    } as CliOptions;
     result.parallel = toNonNegativeInt('parallel', values.parallel as string | undefined);
     result.retry = toNonNegativeInt('retry', values.retry as string | undefined);
     if (values['no-error-exit']) result.errorExit = false;

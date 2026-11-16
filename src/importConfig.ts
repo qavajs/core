@@ -3,21 +3,41 @@ import { existsSync } from 'node:fs';
 import { pathToFileURL } from 'node:url';
 import { UsageError } from './UsageError';
 
-let loadTS = true;
-async function importTS(configPath: string) {
-    if (loadTS) {
-        require('tsx/cjs/api').register();
-        loadTS = false;
-    }
-    return require(configPath)
+let tsRegistered = false;
+
+/**
+ * Register tsx require hook for the whole process: besides the config itself,
+ * TypeScript support code (`require: ['steps/*.ts']`) is loaded through it
+ */
+function registerTS() {
+    if (tsRegistered) return;
+    require('tsx/cjs/api').register();
+    tsRegistered = true;
+}
+
+/**
+ * Load .ts / .cts file as CommonJS through tsx
+ */
+function requireTS(path: string) {
+    registerTS();
+    return require(path);
+}
+
+/**
+ * Load .mts file as ES module through tsx (keeps ESM semantics such as top-level await)
+ */
+async function importMTS(path: string) {
+    registerTS();
+    const { tsImport } = require('tsx/esm/api') as typeof import('tsx/esm/api');
+    return tsImport(pathToFileURL(path).href, __filename);
 }
 
 export async function importFile(path: string): Promise<any> {
     const fullPath = resolve(process.cwd(), path);
     if (!existsSync(fullPath)) throw new UsageError(`file '${path}' not found (resolved to ${fullPath})`);
-    return fullPath.endsWith('.ts')
-        ? await importTS(fullPath)
-        : await import(pathToFileURL(fullPath).href);
+    if (fullPath.endsWith('.mts')) return importMTS(fullPath);
+    if (fullPath.endsWith('.ts') || fullPath.endsWith('.cts')) return requireTS(fullPath);
+    return import(pathToFileURL(fullPath).href);
 }
 
 export async function importMemory(path: string): Promise<any> {

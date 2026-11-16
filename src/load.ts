@@ -10,6 +10,7 @@ import { getValidation, getPollValidation } from '@qavajs/validation';
 import { importConfig, importMemory } from './importConfig';
 import type { IQavajsWorld, Validation } from './IQavajsWorld';
 import { executeTest } from './executeTest';
+import { MemoryValue } from './MemoryValue';
 const configPath = process.env.CONFIG as string;
 const profile = process.env.PROFILE as string;
 const config = importConfig(configPath, profile);
@@ -29,12 +30,32 @@ try {
   console.warn('[qavajs] soft assertion step-continuation is not available on this version of @cucumber/cucumber');
 }
 
-export async function executeStep(this: any, text: string, extraParam?: DataTable | string) {
-  const stepDefsLibrary = supportCodeLibraryBuilder.buildStepDefinitions();
-  const steps = stepDefsLibrary.stepDefinitions.filter(s => s.matchesStepName(text));
+type StepDefinitions = ReturnType<typeof supportCodeLibraryBuilder.buildStepDefinitions>['stepDefinitions'];
+
+let stepDefinitionsCache: { configs: unknown[], length: number, last: unknown, definitions: StepDefinitions } | undefined;
+
+/**
+ * Step definitions built from the support code library builder.
+ * Building them is expensive, so they are cached until step definition configs change
+ * (new step registered, step overridden or builder reset).
+ */
+export function getStepDefinitions(): StepDefinitions {
+  const configs: unknown[] = (supportCodeLibraryBuilder as any).stepDefinitionConfigs ?? [];
+  const last = configs[configs.length - 1];
+  const cache = stepDefinitionsCache;
+  if (cache && cache.configs === configs && cache.length === configs.length && cache.last === last) {
+    return cache.definitions;
+  }
+  const definitions = supportCodeLibraryBuilder.buildStepDefinitions().stepDefinitions;
+  stepDefinitionsCache = { configs, length: configs.length, last, definitions };
+  return definitions;
+}
+
+export async function executeStep(this: IQavajsWorld, text: string, extraParam?: DataTable | string) {
+  const steps = getStepDefinitions().filter(s => s.matchesStepName(text));
   if (steps.length === 0) throw new Error(`Step '${text}' is not defined`);
   if (steps.length > 1) throw new Error(`Step '${text}' matches multiple step definitions`);
-  const step = steps.pop() as any;
+  const step = steps[0];
   const { parameters } = await step.getInvocationParameters({ step: { text }, world: this } as any);
   try {
     await step.code.apply(this, [...parameters, extraParam]);
@@ -44,25 +65,7 @@ export async function executeStep(this: any, text: string, extraParam?: DataTabl
   }
 }
 
-export class MemoryValue {
-  constructor(public world: IQavajsWorld, public expression: string) {}
-
-  /**
-   * Return resolved value
-   * @example
-   * url.value()
-   * @return any
-   */
-  value() { return this.world.getValue(this.expression) }
-
-  /**
-   * Set value to memory with provided key
-   * @param value any - value to set
-   * @example
-   * url.set('https://qavajs.github.io/')
-   */
-  set(value: any): void { this.world.setValue(this.expression, value); }
-}
+export { MemoryValue };
 
 function transformString(fn: (value: string) => any) {
   return function (s1: string, s2: string) {

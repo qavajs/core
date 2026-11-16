@@ -17,6 +17,20 @@ describe('importConfig', () => {
     expect(config).toEqual({ value: 1 });
   });
 
+  test('loads .mts config as ES module (top-level await) with profiles', async () => {
+    expect(await importConfig('test/fixtures/config-esm.mts', 'default')).toEqual({ defaultTimeout: 30_000, kind: 'mts' });
+    expect(await importConfig('test/fixtures/config-esm.mts', 'smoke')).toEqual({ kind: 'mts-smoke' });
+  });
+
+  test('loads .cts config with profiles', async () => {
+    expect(await importConfig('test/fixtures/config-cjs.cts', 'default')).toEqual({ defaultTimeout: 30_000, kind: 'cts' });
+    expect(await importConfig('test/fixtures/config-cjs.cts', 'smoke')).toEqual({ kind: 'cts-smoke' });
+  });
+
+  test('loads .mts memory module', async () => {
+    expect(await importMemory('test/fixtures/memory-module.mts')).toEqual({ token: 'mts-memory-token' });
+  });
+
   test('falls back to plain config object for default profile', async () => {
     const config = await importConfig('test/fixtures/config-plain.js', 'default');
     expect(config).toEqual({ value: 'plain-config' });

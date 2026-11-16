@@ -13,7 +13,7 @@ Commands:
   ui                          Open the interactive test runner in the browser
 
 Options:
-  --config <path>             Config file (default: config.ts, config.js, config.mjs or config.cjs)
+  --config <path>             Config file (default: config.ts, .js, .mjs, .cjs, .mts or .cts)
   --profile <name>            Config profile to run (default: default)
   --paths <glob>              Feature file paths, also accepted as positional args (repeatable)
   -t, --tags <expression>     Tag expression filter (repeatable, ANDed)

@@ -1,7 +1,5 @@
 import { Constants } from './memory';
-import { IRunResult } from '@cucumber/cucumber/api';
 import { IQavajsConfig } from "../../index";
-import externalService from "./externalService";
 
 export default {
   unexpected: 32,
@@ -18,23 +16,7 @@ export default {
   },
   memory: new Constants(),
   defaultTimeout: 20000,
-  parallel: 1,
-  service: [{
-    before() {
-      console.log('service 1 started');
-    },
-  }, {
-    before() {
-      console.log('service 2 started');
-    },
-    after(result: IRunResult) {
-      console.log(result.success);
-    }
-  }, {
-    ...externalService,
-    options: { data: 42 }
-  }],
-  serviceTimeout: 20000
+  parallel: 1
 } as IQavajsConfig;
 
 export const stringMemory = {
@@ -49,21 +31,5 @@ export const stringMemory = {
   ],
   memory: './test-e2e/ts/memory/index.ts',
   defaultTimeout: 20000,
-  parallel: 1,
-  service: [{
-    before() {
-      console.log('service 1 started');
-    },
-  }, {
-    before() {
-      console.log('service 2 started');
-    },
-    after(result: IRunResult) {
-      console.log(result.success);
-    }
-  }, {
-    ...externalService,
-    options: { data: 42 }
-  }],
-  serviceTimeout: 20000
+  parallel: 1
 } as IQavajsConfig;

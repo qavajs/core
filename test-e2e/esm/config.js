@@ -11,19 +11,7 @@ export default {
   ],
   memory: [new Constants(), { additionalValue: 12 }],
   defaultTimeout: 20000,
-  parallel: 1,
-  service: [{
-    before() {
-      console.log('service 1 started');
-    },
-  }, {
-    before() {
-      console.log('service 2 started');
-    },
-    after(result) {
-      console.log(result.success);
-    }
-  }]
+  parallel: 1
 }
 
 export const stringMemory = {
@@ -36,17 +24,5 @@ export const stringMemory = {
     ['@qavajs/console-formatter']
   ],
   defaultTimeout: 20000,
-  parallel: 1,
-  service: [{
-    before() {
-      console.log('service 1 started');
-    },
-  }, {
-    before() {
-      console.log('service 2 started');
-    },
-    after(result) {
-      console.log(result.success);
-    }
-  }]
+  parallel: 1
 }

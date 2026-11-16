@@ -4,13 +4,15 @@ export default defineConfig({
   test: {
     coverage: {
       provider: 'v8',
-      all: true,
       include: ['src/**/*.ts'],
-      exclude: ['/lib/', '/node_modules/', 'src/@types/**', '**/*.d.ts', 'src/load.ts'],
-      branches: 10,
-      functions: 10,
-      lines: 10,
-      statements: 10,
+      // src/index.ts only calls cli main(), covered by test/cli.spec.ts
+      exclude: ['src/index.ts', '**/*.d.ts'],
+      thresholds: {
+        statements: 90,
+        branches: 80,
+        functions: 85,
+        lines: 90,
+      },
     },
     testTimeout: 20000
   }
