@@ -1,5 +1,6 @@
 import { describe, test, expect } from 'vitest';
 import { cliOptions, findTypos } from '../src/cliOptions';
+import { UsageError } from '../src/UsageError';
 
 describe('cliOptions', () => {
     test('maps --parallel to number', () => {
@@ -57,8 +58,12 @@ describe('cliOptions', () => {
         expect(result.worldParameters).toEqual(['{"a":1}', '{"b":2}']);
     });
 
-    test.each(['abc', '-1', '1.5', ''])('throws for invalid --parallel %j', (value) => {
+    test.each(['abc', '-1', '1.5'])('throws for invalid --parallel %j', (value) => {
         expect(() => cliOptions(['node', 'script', '--parallel', value])).toThrow('--parallel must be a non-negative integer');
+    });
+
+    test('empty --parallel is reported as missing value', () => {
+        expect(() => cliOptions(['node', 'script', '--parallel', ''])).toThrow('--parallel requires a value');
     });
 
     test('throws for invalid --retry', () => {
@@ -96,5 +101,41 @@ describe('findTypos', () => {
 
     test('stops at --', () => {
         expect(findTypos(['--', '--tag'])).toEqual([]);
+    });
+});
+
+describe('options without value', () => {
+    const parse = (...args: string[]) => () => cliOptions(['node', 'qavajs', ...args]);
+
+    test.each([
+        [['--config']],
+        [['--config=']],
+        [['--parallel']],
+        [['-t']],
+        [['--tags', '@a', '--tags']],
+    ])('%j is reported as missing value', args => {
+        expect(parse(...args)).toThrow(UsageError);
+        expect(parse(...args)).toThrow(`${args[args.length - 1].replace('=', '')} requires a value`);
+    });
+
+    test.each([
+        [['--config', '-q'], "--config requires a value, got option '-q'"],
+        [['--tags', '--name', 'x'], "--tags requires a value, got option '--name'"],
+        [['--memory-values', '--quiet'], "--memory-values requires a value, got option '--quiet'"],
+        [['--format', '--custom=1'], "--format requires a value, got option '--custom=1'"],
+    ])('%j does not take the next option as value', (args, message) => {
+        expect(parse(...args)).toThrow(message);
+    });
+
+    test('values starting with dash can be passed inline', () => {
+        expect(cliOptions(['node', 'qavajs', '--name=-x', '--retry=1']).name).toEqual(['-x']);
+    });
+
+    test('regular values are accepted', () => {
+        const options = cliOptions(['node', 'qavajs', '--config', 'config.js', '--tags', 'not @wip']);
+        expect(options.config).toBe('config.js');
+        expect(options.tags).toEqual(['not @wip']);
+        // negative numbers are values, not options: validated by the option itself
+        expect(() => cliOptions(['node', 'qavajs', '--retry', '-1'])).toThrow('--retry must be a non-negative integer');
     });
 });

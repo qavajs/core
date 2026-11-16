@@ -1,13 +1,21 @@
-import { test, beforeEach, vi, expect } from 'vitest';
+import { test, beforeEach, afterEach, vi, expect } from 'vitest';
 import { run } from '../src/run';
 
 import { importConfig } from '../src/importConfig';
 
 vi.mock('../src/importConfig');
 
+let originalArgv: string[];
+
 beforeEach(async () => {
+    originalArgv = [...process.argv];
+    process.argv = ['node', 'script'];
     vi.resetAllMocks();
     vi.useRealTimers();
+});
+
+afterEach(() => {
+    process.argv = originalArgv;
 });
 
 const supportMock = {
@@ -82,8 +90,7 @@ test('formatOptions from config is passed to loadConfiguration', async () => {
 });
 
 test('exitCode=0 if passed --no-error-exit', async () => {
-    process.argv.push('--no-error-exit');
-    process.argv.push('--config')
+    process.argv.push('--no-error-exit', '--config', 'config.ts');
     vi.mocked(importConfig).mockReturnValue(Promise.resolve({
 
     }));

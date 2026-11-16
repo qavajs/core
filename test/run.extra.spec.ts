@@ -237,9 +237,23 @@ test('auto-discovers config.mjs and config.cjs', async () => {
     expect(importConfig).toHaveBeenCalledWith('config.cjs', expect.any(String));
 });
 
+test.each(['config.mts', 'config.cts'])('auto-discovers %s', async file => {
+    vi.mocked(existsSync).mockImplementation(path => path === `./${file}`);
+    vi.mocked(importConfig).mockResolvedValue({});
+    await run(buildCucumberMock());
+    expect(importConfig).toHaveBeenCalledWith(file, expect.any(String));
+});
+
+test('config.ts takes precedence over other default configs', async () => {
+    vi.mocked(existsSync).mockReturnValue(true);
+    vi.mocked(importConfig).mockResolvedValue({});
+    await run(buildCucumberMock());
+    expect(importConfig).toHaveBeenCalledWith('config.ts', expect.any(String));
+});
+
 test('No config provided error lists looked up files', async () => {
     vi.mocked(existsSync).mockReturnValue(false);
-    await expect(run(buildCucumberMock())).rejects.toThrow(/config\.ts, config\.js, config\.mjs, config\.cjs.*--config <path>/);
+    await expect(run(buildCucumberMock())).rejects.toThrow(/config\.ts, config\.js, config\.mjs, config\.cjs, config\.mts, config\.cts.*--config <path>/);
 });
 
 test('parses and merges --format-options and --world-parameters from cli', async () => {

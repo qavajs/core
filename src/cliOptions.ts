@@ -113,13 +113,39 @@ export interface CliOptions {
     [flag: string]: unknown;
 }
 
+/** `--flag` or `-f`: a flag, not a value */
+const FLAG_LIKE = /^(--\S+|-[a-zA-Z])$/;
+
+/**
+ * With `strict: false` parseArgs does not report string options without a value:
+ * `--config` at the end becomes `true` and `--config -q` takes `-q` as the value.
+ */
+function assertOptionValues(tokens: NonNullable<ReturnType<typeof parseArgs>['tokens']>) {
+    for (const token of tokens) {
+        if (token.kind !== 'option') continue;
+        const option = OPTIONS[token.name as keyof typeof OPTIONS];
+        if (option?.type !== 'string') continue;
+        if (token.value === undefined || token.value.trim() === '') {
+            throw new UsageError(`${token.rawName} requires a value`);
+        }
+        if (!token.inlineValue && FLAG_LIKE.test(token.value.split('=')[0])) {
+            throw new UsageError(
+                `${token.rawName} requires a value, got option '${token.value}'. ` +
+                `Use ${token.rawName}=<value> if the value starts with '-'`
+            );
+        }
+    }
+}
+
 export function cliOptions(argv: string[]): CliOptions {
-    const { values, positionals } = parseArgs({
+    const { values, positionals, tokens } = parseArgs({
         args: argv.slice(2),
         options: OPTIONS,
         strict: false,
         allowPositionals: true,
+        tokens: true,
     });
+    assertOptionValues(tokens);
 
     // strict: false keeps unknown flags, so parseArgs can't narrow value types
     const result = {

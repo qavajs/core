@@ -111,7 +111,8 @@ function printConfigTable(config: Record<string, unknown>, testCount: number, pr
     console.log(paint(`└${h.repeat(kw + 2)}┴${h.repeat(vw + 2)}┘`, 'dim'));
 }
 
-export const DEFAULT_CONFIGS = ['config.ts', 'config.js', 'config.mjs', 'config.cjs'];
+// new extensions are appended so existing projects keep picking the same file
+export const DEFAULT_CONFIGS = ['config.ts', 'config.js', 'config.mjs', 'config.cjs', 'config.mts', 'config.cts'];
 
 function getConfig(argvConfig?: string) {
     if (argvConfig) return argvConfig;

@@ -52,7 +52,7 @@ npx qavajs run --config <config> --profile <profile>
 npx cucumber-js run --config <config>
 ```
 
-If `--config` is omitted, `config.ts`, `config.js`, `config.mjs` or `config.cjs` from the current directory is used.
+If `--config` is omitted, the first of `config.ts`, `config.js`, `config.mjs`, `config.cjs`, `config.mts` or `config.cts` found in the current directory is used.
 Feature files can be passed as positional arguments (with optional line numbers):
 
 ```bash
@@ -128,7 +128,7 @@ Keyboard shortcuts: `F5` / `Ctrl+Enter` run visible tests, `Esc` stops the run, 
 
 ## Configuration
 
-Config files can be written in JS, CJS, TS, or ESM format.
+Config files can be written in JS (`.js`, `.cjs`, `.mjs`) or TypeScript (`.ts`, `.cts`, `.mts`). `.mts` configs are loaded as ES modules, so top-level `await` is supported there.
 
 ```typescript
 // config.ts
